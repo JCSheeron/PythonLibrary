@@ -1,0 +1,20 @@
+# ignore the bin, lib, and share directories -- they are for the virtual environment
+bin/
+lib/
+share/
+
+# ignore __init__.py -- it is a flag for python
+__init__.py
+
+# ignore auto created *.orig files (created by vim)
+*.orig
+
+# ignore other stuff for the virtual environment
+lib64
+pyvenv.cfg
+activate
+pip-selfcheck.json
+
+# compiled python cache
+__pycache__/
+
