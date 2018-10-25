@@ -5,7 +5,7 @@
 #   oomCeil(val, mag=None)
 #   oomFloor(val, mag=None)
 #   oomRound(val, mag=None)
-#   polyPrettyPrint(p, dir=0)
+#   polyPrettyPrint(p, cdir=0, precision=8)
 #
 from math import floor, ceil, log10
 #
@@ -145,7 +145,8 @@ def oomRound(val, mag=None):
 # power first).
 # The returned string will always print in decending power (highest order
 # coefficients first).
-def polyPrettyPrint(p, cdir=0):
+# precision is used to control how may decimal places are included
+def polyPrettyPrint(p, cdir=0, precision=8):
     '''Create a nicely formatted polynomial as a stirng'''
     # Make sure p is list-like
     try:
@@ -154,6 +155,16 @@ def polyPrettyPrint(p, cdir=0):
         res= '' # init so we can use +=, even the first time
     except ValueError as ve:
         print('The coefficients must be convertable to a list.')
+        print(ve)
+        return ''
+
+    # make sure fix is int-like
+    try:
+        precision= int(precision)
+        if precision < 0:
+            precision= 0
+    except ValueError as ve:
+        print('The decimal precision parameter must be convertable to an integer.')
         print(ve)
         return ''
 
@@ -172,15 +183,15 @@ def polyPrettyPrint(p, cdir=0):
             if coeff == 1: # don't display coeff when = 1
                 res += 'x^{e} + '.format(e=exp)
             elif coeff != 0:
-                res += '{c}x^{e} + '.format(c=coeff, e=exp)
+                res += '{c:{width}.{precision}{type}}x^{e} + '.format(c=coeff, width=3, precision=precision, type='G' , e=exp)
         elif exp == 1:  # x^1 case
             if coeff == 1: # don't display coeff when = 1
                 res += 'x + '
             elif coeff != 0:
-                res += '{c}x + '.format(c=coeff)
+                res += '{c:{width}.{precision}{type}}x + '.format(c=coeff, width=3, precision=precision, type='G')
         else:   # x^0 case
             if coeff != 0:  # nothing to do if coff is zero
-                res += '{c} + '.format(c=coeff)
+                res += '{c:{width}.{precision}{type}} + '.format(c=coeff, width=3, precision=precision, type='G')
     # it could be the empty case, but if not, ditch the last ' + ' 
     if res:
         return res[:-3]
