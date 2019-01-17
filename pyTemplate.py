@@ -44,10 +44,24 @@ eplStr="""Python Program Template file
  line arguments, options, etc. """
 
 descrStr="Short description string."
+
+# eample of defining a local function
+# example of enforcing specifics on an argument
+def intDegree(degArg):
+    value=int(degArg)
+    if not isinstance(value, int) or value < 1:
+        msg = "The --degree argument, value %r, is not an integer >=1" % degArg
+        raise argparse.ArgumentTypeError(msg)
+    return value
+
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, \
                                  description=descrStr, epilog=eplStr)
 parser.add_argument('posArg1', help='Positional Argument 1')
 parser.add_argument('posArg2', help= 'Positional Argument 2')
+# degree must be an integer >= 1
+parser.add_argument('--degree', default=1, type=intDegree, \
+                    metavar='', help='Polynomial degree used to \
+curve fit the data. Default value is 1 for linear curve fit.')
 parser.add_argument('-optArg1', '--optionalArgument1', default=None, metavar='', \
                    help='Optional Argument 1')
 parser.add_argument('-optArg2', '--optionalArgument2', default='optArg2', metavar='', \
@@ -73,6 +87,7 @@ print(args)
 # Argument          Values      Description
 # args.posArg1      string
 # args.posArg2      string
+# args.degree       integer >= 1
 # args.optionalArgument1     string
 # args.optionalArgument2      string
 # args.optTFArg1    True/False
@@ -103,6 +118,12 @@ else:
     # Not actually possible, since this is a positional argument.
     # Inclued here so we can see how to process arguments.
     print('No value for posArg2.')
+
+if args.degree is not None:
+    print(args.degree)
+else:
+    # arg is none, so print a message.
+    print('No value for degree.')
 
 if args.optionalArgument1 is not None:
     print(args.optionalArgument1)
