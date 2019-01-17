@@ -71,7 +71,7 @@ parser.add_argument('posArg1', help='Positional Argument 1')
 parser.add_argument('posArg2', help= 'Positional Argument 2')
 parser.add_argument('-optArg1', '--optionalArgument1', default=None, metavar='', \
                    help='Optional Argument 1')
-parser.add_argument('-optArg2', '--optionalArgument2', default='default2', metavar='', \
+parser.add_argument('-optArg2', '--optionalArgument2', default='optArg2', metavar='', \
                    help='Optional Argument 2. How to escape a special \
 character (\", \").How to escape the %% character.')
 parser.add_argument('-optTFArg1', action='store_true', default=False, \
@@ -92,8 +92,8 @@ args = parser.parse_args()
 # Argument          Values      Description
 # args.posArg1      string
 # args.posArg2      string
-# args.optArg1      string
-# args.optArg2      string
+# args.optionalArgument1     string
+# args.optionalArgument2      string
 # args.optTFArg1    True/False
 # args.me1          True/False
 # args.me2          True/False
@@ -115,6 +115,49 @@ else:
     # Inclued here so we can see how to process arguments.
     print('No value for posArg1.')
 
+if args.posArg2 is not None:
+    print(args.posArg2)
+else:
+    # arg is none, so print a message.
+    # Not actually possible, since this is a positional argument.
+    # Inclued here so we can see how to process arguments.
+    print('No value for posArg2.')
+
+if args.optionalArgument1 is not None:
+    print(args.optionalArgument1)
+else:
+    # arg is none, so print a message.
+    print('No value for optArg1.')
+
+if args.optionalArgument2 is not None:
+    print(args.optionalArgument2)
+else:
+    # arg is none, so print a message.
+    print('No value for optArg1.')
+
+if args.optTFArg1 is not None:
+    print(args.optTFArg1)
+else:
+    # arg is none, so print a message.
+    print('No value for optTFArg1.')
+
+if args.me1 is not None:
+    print(args.me1)
+else:
+    # arg is none, so print a message.
+    print('No value for me1.')
+
+if args.me2 is not None:
+    print(args.me2)
+else:
+    # arg is none, so print a message.
+    print('No value for me2.')
+
+if args.me3 is not None:
+    print(args.me3)
+else:
+    # arg is none, so print a message.
+    print('No value for me3.')
 
 #get end  processing time
 procEnd = datetime.now()
