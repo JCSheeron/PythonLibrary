@@ -5,28 +5,7 @@
 #
 # This is intended to be a template to be used as a starting place when creating a
 # new python program. It is just a basic formatted framwork and some examples of
-# how to set up command line arguments.
-#
-# Command line arguments are:
-# inputFileName (required, positional). The source data csv file.
-#
-# outputFileName (required, positional). The .csv output file name.
-#
-# -t, (required and mutually exclusive with -a and -n).  Input file
-# is a historical trend export file.  The format is:
-#     Tag1 TimeStamp, Tag1 Value, Tag2 TimeStamp, Tag2Timestamp ...
-#
-# -a (required and mutually exclusive with -t and -n). Input file is a
-# archive export file. The format is:
-#     TagId, TagName, Timestamp (YYYY-MM-DD HH:MM:SS.mmm), DataSource, Value, Quality
-#
-# -n (required and mutually exclusive with -t and -a). Input file is a time
-# normalized export file.  The format is:
-#     Timestamp, Time Bias, Tag1 Value, Tag2 Value, Tag3 Value ...
-#
-# -am1, -am2, -am3, -am4 or --archiveMergen (optional, default=None). Archive Merge.
-# Merge these named files with the data in the inputFileName before processing.
-# Must have the same format/layout as the input file.
+# how to import libraries and set up command line arguments.
 #
 # imports
 #
@@ -87,6 +66,8 @@ typegroup.add_argument('-me3', action='store_true', default=False, \
                     help='Mutually Exclusive choice 3')
 # parse the arguments
 args = parser.parse_args()
+print('The following arguments were parsed:')
+print(args)
 
 # At this point, the arguments will be:
 # Argument          Values      Description
