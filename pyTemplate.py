@@ -5,7 +5,7 @@
 #
 # This is intended to be a template to be used as a starting place when creating a
 # new python program. It is just a basic formatted framwork and some examples of
-# how to import libraries and set up command line arguments.
+# how to import libraries, set up command line arguments, and read in a config file.
 #
 # imports
 #
@@ -15,6 +15,9 @@
 from datetime import datetime, time
 # from pandas.tseries.frequencies import to_offset
 # from dateutil import parser as duparser
+
+# config file parser
+import configparser
 
 # csv file stuff
 # import csv
@@ -62,6 +65,10 @@ parser.add_argument('posArg2', help= 'Positional Argument 2')
 parser.add_argument('--degree', default=1, type=intDegree, \
                     metavar='', help='Polynomial degree used to \
 curve fit the data. Default value is 1 for linear curve fit.')
+parser.add_argument('-c', '--configFile', default='config.ini', metavar='', \
+                   help='Config file. Default is config.ini.')
+parser.add_argument('-v', '--verbose', action='store_true', default=False, \
+                    help='Verbose output, usually used for troubleshooting.')
 parser.add_argument('-optArg1', '--optionalArgument1', default=None, metavar='', \
                    help='Optional Argument 1')
 parser.add_argument('-optArg2', '--optionalArgument2', default='optArg2', metavar='', \
@@ -80,14 +87,14 @@ typegroup.add_argument('-me3', action='store_true', default=False, \
                     help='Mutually Exclusive choice 3')
 # parse the arguments
 args = parser.parse_args()
-print('The following arguments were parsed:')
-print(args)
 
 # At this point, the arguments will be:
 # Argument          Values      Description
 # args.posArg1      string
 # args.posArg2      string
 # args.degree       integer >= 1
+# args.configFile   string, default 'config.ini'
+# args.verbose      True/False, default False
 # args.optionalArgument1     string
 # args.optionalArgument2      string
 # args.optTFArg1    True/False
@@ -101,6 +108,28 @@ print('**** Begin Processing ****')
 # get start processing time
 procStart = datetime.now()
 print('    Process start time: ' + procStart.strftime('%m/%d/%Y %H:%M:%S'))
+
+# bring in config data from config.ini by default or from file specified
+# with -c argument
+config = configparser.ConfigParser()
+cfgFile = config.read(args.configFile)
+# bail out if no config file was read
+if not cfgFile:
+    print('\nERROR: The configuration file: ' + args.configFile + ' was not found. Exiting.')
+    quit()
+# if we get here, we have config data
+if args.verbose:
+    print('\nThe config file(s) used are:')
+    print(cfgFile)
+    print('\nThe resulting configuration has these settings:')
+    for section in config:
+        print(section)
+        for key in config[section]:
+            print('  ', key, ':', config[section][key])
+
+if args.verbose:
+    print('\nThe following arguments were parsed:')
+    print(args)
 
 # Process the arguments
 if args.posArg1 is not None:
