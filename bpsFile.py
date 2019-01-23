@@ -10,13 +10,13 @@ def listFiles(path):
     '''return a list of files in a given path, excluding directories.'''
     # Make sure path has something in it.
     try:
-        path=str(path)
+        path = str(path)
     except ValueError as ve:
         print('The sepcified path must be convertable to a string.')
         print(ve)
         return None
 
-    if path = '' or path is None:
+    if path == '' or path is None:
         print('The specified path must be specified, and not be an empty string.')
         return None
 
