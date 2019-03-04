@@ -28,11 +28,12 @@ from math import floor, ceil, log10
 # oomCeil(0.0031, -4) returns 0.0031, same for more negative values of mag.
 def oomCeil(val, mag=None):
     '''Return value rounded up to the next value with the same or the specified order of magnitude.'''
-    # Make sure val is an int or a float. Raise if not.
-    if(isinstance(val,(float, int))):
-        value = val
-    else:
-        print('The value parmater must be an integer or a float.')
+    # Make sure val can be converted to a float.  Raise if not.
+    try:
+        value = float(val)
+    except ValueError as ve:
+        print('The value parmater must be a float, or convertable to a float.')
+        print(ve)
         return None
 
     # Get the order of magnitude of value.  Do this before evaluating oom, so
@@ -74,11 +75,12 @@ def oomCeil(val, mag=None):
 # oomFloor(0.0031, -4) returns 0.0031, same for more negative values of mag.
 def oomFloor(val, mag=None):
     '''Return value rounded down to the next value with the same or the specified order of magnitude.'''
-    # Make sure val is an int or a float. Raise if not.
-    if(isinstance(val,(float, int))):
-        value = val
-    else:
-        print('The value parmater must be an integer or a float.')
+    # Make sure val can be converted to a float.  Raise if not.
+    try:
+        value = float(val)
+    except ValueError as ve:
+        print('The value parmater must be a float, or convertable to a float.')
+        print(ve)
         return None
 
     # Get the order of magnitude of value.  Do this before evaluating oom, so
@@ -120,11 +122,12 @@ def oomFloor(val, mag=None):
 # oomRound(0.0067, -4) returns 0.0067, same for more negative values of mag.
 def oomRound(val, mag=None):
     '''Return value rounded up to the next value with the same or the specified order of magnitude.'''
-    # Make sure val is an int or a float. Raise if not.
-    if(isinstance(val,(float, int))):
-        value = val
-    else:
-        print('The value parmater must be an integer or a float.')
+    # Make sure val can be converted to a float.  Raise if not.
+    try:
+        value = float(val)
+    except ValueError as ve:
+        print('The value parmater must be a float, or convertable to a float.')
+        print(ve)
         return None
 
     # Get the order of magnitude of value.  Do this before evaluating oom, so
