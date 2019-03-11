@@ -6,7 +6,6 @@
 #
 # imports
 #
-# config file parser
 
 class ClassName(object):
     # class constants
