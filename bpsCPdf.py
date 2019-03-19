@@ -152,3 +152,26 @@ class cPdf(FPDF):
         # return the tuple of font names
         return(regularMonoName, boldMonoName, regularPropName, boldPropName)
 
+    # Given the width, height, and a string, determine how high the multi-cell
+    # will be (auto line wrap).  Use the passed in unit and parameter so the 
+    # calculated value takes into account the target font and unit.
+    def GetMultiCellHeight(self, pdf, font_family, unit, w, h, txt, border = 0, align = 'J', fill = False):
+        '''Return the height of a multi-cell given a height, width, and string.'''
+        # Note that the border and align and fill are there to make the call
+        # consistent with the multi_cell ctor.
+        # This routine is a bit brute force:  Make a pdf and a multicell that
+        # will never be seen, and calc and return the delta Y value.
+        #
+        # Get params from passed in pdf
+        font_style = pdf.font_style
+        font_size_pt = pdf.font_size_pt
+        print('font family: ' + str(font_family))
+        # make a local pdf
+        tpdf = FPDF(format='letter', unit = unit)
+        tpdf.add_page()
+        #tpdf.set_font(font_family, font_style, font_size_pt)
+        tpdf.set_font(font_family)
+        startY = tpdf.get_y()
+        tpdf.multi_cell(w, h, txt, border, align, fill)
+        endY = tpdf.get_y()
+        return (endY - startY)
