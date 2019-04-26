@@ -71,7 +71,17 @@ class cPdf(FPDF):
         else:
             # default
             self.set_font(self.defaultFontNames[3], 'B', 10)
+
+        # header text
         self.cell(20, -40, self._headerText)
+
+        # set to regular proportional font
+        if self.fontNames[2] != self.defaultFontNames[2]:
+            # non-default
+            self.set_font("regularProp", '', 10)
+        else:
+            # default
+            self.set_font(self.defaultFontNames[2], '', 10)
         self.ln(10) # line break
 
     # define the page footer
