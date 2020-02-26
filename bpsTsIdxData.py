@@ -15,145 +15,152 @@ from dateutil import parser as duparser
 import numpy as np
 import pandas as pd
 
-# Class: TsIdxData
-# File: TsIdxData.py
-#
-# Timestamped Indexed Data
-#
-# This file implements an data contaner which holds time stamped values,
-# indexed and sorted by time stamp. The data container is implemented as a
-# Pandas Dataframe.  The timestamp is a Datetime, and the values are floats. 
-#
-# The source data used to populate the container can have multiple value
-# columns, but one column needs have a name which matches yName. This column
-# will be considered the "value" column.  
-#
-# The source data used to populate the container also must have one value
-# column or an index column with a name that matches tsName. This column will be
-# used as the index.
-#
-# The constructor is expecting a data frame which is used as the source data.
-#
-# The constructor (ctor) has these areguments:
-#   name -- The name to give the object. An instrument name for example.
-#
-#   tsName -- The name of the timestamp (index) column.
-#
-#   yName -- The name of the value column.
-#
-#   df -- The source data used to populate the data container. If a data frame
-#         is not specified, then an empty data frame is created.  See
-#         "Data Structure Notes" below.
-#
-#   valueQuery -- Query string used to filter the dataset.
-#                 Default is empty, so nothing is filtered out. Use "val" to
-#                 represent the process value(s). Use "==" for an equality test.
-#                 For example, to filter out all values < 0 or > 100, you want 
-#                 to keep everything else,so the filter string would be:
-#                   "val >= 0 and val <= 100".
-#
-#   startQuery -- Datetime string used to filter the dataset.  Data timestamped
-#                 before this time will be filtered out. The default is empty,
-#                 so no data is filtered out if nothing is specified.
-#
-#   endQuery -- Datetime string used to filter the dataset.  Data timestamped
-#               after this time will be filtered out. The default is empty,
-#               so no data is filtered out if nothing is specified.
-#
-#   sourceTimeFormat -- Specify the time format of the source data timestamp.
-#                       If nothing is specified, the value defaults to
-#                       "%m/%d/%Y %H:%M:%S.%f". A string using the following
-#                       symbolic placeholders is used to specify the format: 
-#                           %m minutes, %d days, %Y 4 digit year, 
-#                           %y two digit year, %H hours (24hr format),
-#                           %I hours (12 hr format), %M minutes, %S seconds,
-#                           %f for fractional seconds (e.g. %S.%f), %p AM/PM.
-#
-# DATA STRUCTURE NOTES
-#   The source data must have the following structure:
-#       Timestamp data: An index or value column must exist
-#                       labeled with the tsName specified.  This data must be of 
-#                       type datetime or convertable to datetime. It will
-#                       be converted, if needed, to a datetime the format
-#                       specified with the sourceTimeFormat string.
-#
-#       Value data:     A value (non-index) column must exist labeled with the 
-#                       yName specified. This data msut be of type float or
-#                       or convertable to a float. It will be converted if needed.
-#
-#                       Other value (non-index) columns are allowed, the names 
-#                       don't matter, as long as one of them is named yName
-#                       per above.
-#      
-#
-# In addition the data can be resampled, using the resample(args, stats) method.
-# Resampling makes the most sense when the original data has time stamps at 
-# regular intervals, and the interval needs# to be changed.
-# If the data is being upsampled (increase the frequency),
-# than values will be forward filled to populate gaps in the data. If the data
-# is being downsampled (decrease in frequency), then the specified stats will
-# be calculated on values that fall between those being sampled.
-#
-# When resampling, and data is being downsampled, stats can be calculated. The
-# stats parameter is used to specify which stats to calculate.  It is optional
-# and defaults to 'm' if not specified. Choices are: (V)alue, m(I)n, ma(X),
-# (a)verage/(m)ean, and (s)tandard deviation.
-# The (a) and (m) options do the same thing. Choices are not case sensitive.
-# Default is average/mean (m).  In the case of the Value option,
-# the first value available which is on or after the timestamp is shown.
-# The values between this and the next sample point are thrown away.
-# For the other options, the intermediate values are used to calculate the
-# statistic.  Note: The stats parameter is ignored when upsampling.
-#
-# The member data can be appended to using the appendData(dataframe) method.
-#
-# The member data can be replaced using the replaceData(dataframe) method.
-#
-# The following read only properties are implemented
-#    name
-#       string -- object name
-#
-#    tsName
-#       timestamp -- column name
-#
-#    valueQuery
-#       string used to query the source data during construction
-#
-#   indexName 
-#       string name of the index
-#
-#   index
-#       an array of data about the index, including the index data, datatype, and name
-#
-#    columns
-#       dictionary with column names as the key and the data type as a value {col name : datatype, ...}
-#
-#    data
-#        a copy of the dataframe
-#
-#    timeOffset
-#        time period between data samples
-#
-#     startTs
-#         start time filter used to query the source data during construction
-#    
-#     endTs
-#        end time filter used to query the source data during construction 
-#
-#     count
-#        the number of rows in the data frame 
-#
-#     isEmpty
-#       boolean true if data frame is empty
-#
-#
 class TsIdxData(object):
+    """
+    Class: TsIdxData
+    File: TsIdxData.py
+
+    Timestamped Indexed Data
+
+    This file implements an data contaner which holds time stamped values,
+    indexed and sorted by time stamp. The data container is implemented as a
+    Pandas Dataframe.  The timestamp is a Datetime, and the values are floats.
+
+    The source data used to populate the container can have multiple value
+    columns, but one column needs have a name which matches yName. This column
+    will be considered the "value" column.
+
+    The source data used to populate the container also must have one value
+    column or an index column with a name that matches tsName. This column will be
+    used as the index.
+
+    The constructor is expecting a data frame which is used as the source data.
+
+    The constructor (ctor) has these areguments:
+      name -- The name to give the object. An instrument name for example.
+
+      tsName -- The name of the timestamp (index) column.
+
+      yName -- The name of the value column.
+
+      df -- The source data used to populate the data container. If a data frame
+            is not specified, then an empty data frame is created.  See
+            "Data Structure Notes" below.
+
+      valueQuery -- Query string used to filter the dataset.
+                    Default is empty, so nothing is filtered out. Use "val" to
+                    represent the process value(s). Use "==" for an equality test.
+                    For example, to filter out all values < 0 or > 100, you want
+                    to keep everything else,so the filter string would be:
+                      "val >= 0 and val <= 100".
+
+      startQuery -- Datetime string used to filter the dataset.  Data timestamped
+                    before this time will be filtered out. The default is empty,
+                    so no data is filtered out if nothing is specified.
+
+      endQuery -- Datetime string used to filter the dataset.  Data timestamped
+                  after this time will be filtered out. The default is empty,
+                  so no data is filtered out if nothing is specified.
+
+      sourceTimeFormat -- Specify the time format of the source data timestamp.
+                          If nothing is specified, the value defaults to
+                          "%m/%d/%Y %H:%M:%S.%f". A string using the following
+                          symbolic placeholders is used to specify the format:
+                              %m minutes, %d days, %Y 4 digit year,
+                              %y two digit year, %H hours (24hr format),
+                              %I hours (12 hr format), %M minutes, %S seconds,
+                              %f for fractional seconds (e.g. %S.%f), %p AM/PM.
+
+    Data Structure Notes
+      The source data must have the following structure:
+          Timestamp data: An index or value column must exist
+                          labeled with the tsName specified.  This data must be of
+                          type datetime or convertable to datetime. It will
+                          be converted, if needed, to a datetime the format
+                          specified with the sourceTimeFormat string.
+
+          Value data:     A value (non-index) column must exist labeled with the
+                          yName specified. This data msut be of type float or
+                          or convertable to a float. It will be converted if needed.
+
+                          Other value (non-index) columns are allowed, the names
+                          don't matter, as long as one of them is named yName
+                          per above.
+
+
+    In addition the data can be resampled, using the resample(args, stats) method.
+    Resampling makes the most sense when the original data has time stamps at
+    regular intervals, and the interval needs# to be changed.
+    If the data is being upsampled (increase the frequency),
+    than values will be forward filled to populate gaps in the data. If the data
+    is being downsampled (decrease in frequency), then the specified stats will
+    be calculated on values that fall between those being sampled.
+
+    When resampling, and data is being downsampled, stats can be calculated. The
+    stats parameter is used to specify which stats to calculate.  It is optional
+    and defaults to 'm' if not specified. Choices are: (V)alue, m(I)n, ma(X),
+    (a)verage/(m)ean, and (s)tandard deviation.
+    The (a) and (m) options do the same thing. Choices are not case sensitive.
+    Default is average/mean (m).  In the case of the Value option,
+    the first value available which is on or after the timestamp is shown.
+    The values between this and the next sample point are thrown away.
+    For the other options, the intermediate values are used to calculate the
+    statistic.  Note: The stats parameter is ignored when upsampling.
+
+    The member data can be appended to using the appendData(dataframe) method.
+
+    The member data can be replaced using the replaceData(dataframe) method.
+
+    The following read only properties are implemented
+        name
+            string -- object name
+
+        tsName
+            timestamp -- column name
+
+        valueQuery
+            string used to query the source data during construction
+
+        startQuery
+            datetime string used to filter the start of the dataset
+
+        endQuery
+            datetime string used to filter the end of the dataset
+
+        indexName
+            string name of the index
+
+        index
+            an array of data about the index, including the index data, datatype, and name
+
+        columns
+            dictionary with column names as the key and the data type as a value {col name : datatype, ...}
+
+        data
+            a copy of the dataframe
+
+        timeOffset
+            time period between data samples
+
+        startTs
+            the first time stamp associated with the data (the start time)
+
+        endTs
+            the last time stamp associated with the data (the end time)
+
+        count
+            the number of rows in the data frame
+
+        isEmpty
+            boolean true if data frame is empty
+    """
+
     def __init__(self, name, tsName=None, yName=None, df=None,
             valueQuery=None, startQuery=None, endQuery=None,
-            sourceTimeFormat='%m/%d/%Y %H:%M:%S.%f', 
+            sourceTimeFormat='%m/%d/%Y %H:%M:%S.%f',
             forceColNames=False):
         self._name = str(name) # use the string version
-
+        """ TsIdxData constructor (ctor). Details are in above class description."""
         # default x-axis (timestamp) label to 'timestamp' if nothing is specified
         if tsName is None:
             self._tsName = 'timestamp'
@@ -169,7 +176,7 @@ class TsIdxData(object):
         # Keep the column (header) names as a property
         self._columns = [self._tsName, self._yName]
 
-        # Default the value query to empty if not specified. 
+        # Default the value query to empty if not specified.
         if valueQuery is None:
             self._vq = ''
         else:
@@ -224,7 +231,7 @@ class TsIdxData(object):
                     # If and end time was not specified, force it to the end
                     # of the day so the entire date is included.
                     if self._endQuery.time() == time(0,0,0,0):
-                        self._endQuery = self._endQuery.replace(hour=23, minute=59, 
+                        self._endQuery = self._endQuery.replace(hour=23, minute=59,
                                                   second=59, microsecond=999999)
 
                     # convert to a pandas datetime for max compatibility
@@ -246,7 +253,7 @@ class TsIdxData(object):
                 # If and end time was not specified, force it to the end
                 # of the day so the entire date is included.
                 if self._endQuery.time() == time(0,0,0,0):
-                    self._endQuery = self._endQuery.replace(hour=23, minute=59, 
+                    self._endQuery = self._endQuery.replace(hour=23, minute=59,
                                               second=59, microsecond=999999)
 
                 # convert to a pandas datetime for max compatibility
@@ -259,10 +266,10 @@ class TsIdxData(object):
         self._sourceTimeFormat = str(sourceTimeFormat)
 
         # Now deal with the data
-        # Get the specified data into the member data. 
+        # Get the specified data into the member data.
         # Trying to make a new dataframe allows something like a dataframe
         # to be used (like a list, dict, or other dataframe.
-        # If it isn't possible to build a dataframe from what, then assign an 
+        # If it isn't possible to build a dataframe from what, then assign an
         # empty dataframe.
         try:
             self._df = pd.DataFrame(df)
@@ -283,7 +290,7 @@ class TsIdxData(object):
                                                     errors='ignore')
 
             # force the timestamp to a datetime
-            # should not raise an error, as there is no data 
+            # should not raise an error, as there is no data
             self._df[self._tsName] = pd.to_datetime(self._df[self._tsName],
                                                     errors='coerce')
             # set the timestamp as the index
@@ -311,7 +318,7 @@ class TsIdxData(object):
 Cannot infer a frequency. Will try to do so manually by comparing the first few values.')
                 print(te)
                 inferFreq = None
-            except ValueError as ve: 
+            except ValueError as ve:
                 print('    WARNING: There are not enough timestamps to infer a frequency. \n \
 Will try to do so manually by comparing the first few values.')
                 print(ve)
@@ -321,7 +328,7 @@ Will try to do so manually by comparing the first few values.')
                 # If that did not work, try to get it manually. When timestamps are
                 # repeated, it looks like the odd/even rows in that order are
                 # repeated.
-                if inferFreq is None or inferFreq == pd.Timedelta(0): 
+                if inferFreq is None or inferFreq == pd.Timedelta(0):
                     print('    WARNING: Data may have very few, skipped, missing, repeated or corrupted timestamps.\n \
 Determining sampling frequency manually.')
                     # Use 3 and 4 if possible, just in case there is
@@ -353,7 +360,7 @@ Assuming a 1 second data frequency.')
 
     def __repr__(self):
         outputMsg=  '{:13} {}'.format('\nName: ', self._name + '\n')
-        if self.isEmpty: 
+        if self.isEmpty:
             outputMsg+= 'Contains no data!\n'
             outputMsg+= '{:13} {}'.format('Length: ', str(self.count) + '\n')
             return (outputMsg)
@@ -372,24 +379,26 @@ Assuming a 1 second data frequency.')
             return(outputMsg)
 
     def resample(self, resampleArg='S', stats='m'):
-        # Resample the data from the complete dataframe.
-        # The original data is replaced with the resampled data.
-        # Determine if we are up or down sampling by comparing the
-        # specified frequency (time offset) with the data frequency.
-        # If the data is being upsampled (increase the frequency), than values
-        # will be forward filled to populate gaps in the data.
-        # If the data is being downsampled (decrease in frequency), then the
-        # specified stats will be calculated on values that fall between those
-        # being sampled.
-        #
-        # stats (optional, default='m') Choose which statistics to calculate when
-        # resampling. Choices are: (V)alue, m(I)n, ma(X), (a)verage/(m)ean,
-        # and (s)tandard deviation. The (a) and (m) options do the same thing.
-        # Choices are not case sensitive. Default is 
-        # average/mean.  In the case of the Value option, the first value available
-        # which is on or after the timestamp is shown. The values between this and the
-        # next sample point are thrown away. For the other options, the intermediate
-        # values are used to calculate the statistic.
+        """
+        Resample the data from the complete dataframe.
+        The original data is replaced with the resampled data.
+        Determine if we are up or down sampling by comparing the
+        specified frequency (time offset) with the data frequency.
+        If the data is being upsampled (increase the frequency), than values
+        will be forward filled to populate gaps in the data.
+        If the data is being downsampled (decrease in frequency), then the
+        specified stats will be calculated on values that fall between those
+        being sampled.
+
+        stats (optional, default='m') Choose which statistics to calculate when
+        resampling. Choices are: (V)alue, m(I)n, ma(X), (a)verage/(m)ean,
+        and (s)tandard deviation. The (a) and (m) options do the same thing.
+        Choices are not case sensitive. Default is
+        average/mean.  In the case of the Value option, the first value available
+        which is on or after the timestamp is shown. The values between this and the
+        next sample point are thrown away. For the other options, the intermediate
+        values are used to calculate the statistic.
+        """
         #
         # Make sure the resample argument is valid
         if resampleArg is None:
@@ -412,7 +421,7 @@ period specified. Using 1 second.')
             # previous recorded value until a new recorded value is available.
             # In other words -- carry a value forward until a new one is avail.
             # The stats argument is ignored.
-            
+
             # If stats were specified, print a message about not using the specified stats
             if stats is not None or not stats:
                 print('    WARNING: Data is being upsampled. There will be more \
@@ -420,7 +429,7 @@ rows than data. \nCalculating statistics on repeated values does not make sense,
 and a non-empty stat parameter was specified.\n The "stats" parameter will be ignored. \n \
 Set "stats" to an empty string ("") or "None" to eliminate this warning.\n')
 
-            # Create a new data frame with a timestamp and value column, and 
+            # Create a new data frame with a timestamp and value column, and
             # force the data type to timestamp and float
             dfResample = pd.DataFrame(columns=[self._tsName])
             dfResample[self._yName] = np.NaN
@@ -479,13 +488,13 @@ data. Data unchanged. Frequency is ' + str(self._timeOffset))
                not displayStdStat:
                 displayMeanStat = True
                 self._stats = 'm'
-                
+
             minColName = 'min_' + self._name
             maxColName = 'max_' + self._name
             meanColName = 'mean_'+ self._name
             stdColName = 'std_' + self._name
 
-            # Create a new data frame with a timestamp and value column(s), and 
+            # Create a new data frame with a timestamp and value column(s), and
             # force the data type(s) to timestamp and float
             dfResample = pd.DataFrame(columns=[self._tsName])
             if displayValStat:
@@ -559,17 +568,19 @@ data. Data unchanged. Frequency is ' + str(self._timeOffset))
             print('    ' + self._name + ': Resampling not needed. New frequency \
 matches data frequency. Data unchanged. Frequency is ' + str(self._timeOffset))
             return
-           
+
     def appendData(self, srcDf, IgnoreFirstRows=1):
-        # This function takes a source data frame (srcDf) and appends it to the 
-        # member data frame, as long as srcDf is a dataframe.
-        # The column names of the source data are ignored, but 
-        # it is expected that index is or can be converted to a datetime, and the
-        # values are or can be converted to a float.  Use IgnoreFirstRows to set
-        # how many rows to throw away before merging the data. Default is 1, so as
-        # to ignore a header row. Setting IgnoreFirstRows to 0 will treat every
-        # row as data.
-        
+        """
+        This function takes a source data frame (srcDf) and appends it to the
+        member data frame, as long as srcDf is a dataframe.
+        The column names of the source data are ignored, but
+        it is expected that index is or can be converted to a datetime, and the
+        values are or can be converted to a float.  Use IgnoreFirstRows to set
+        how many rows to throw away before merging the data. Default is 1, so as
+        to ignore a header row. Setting IgnoreFirstRows to 0 will treat every
+        row as data.
+        """
+
         # Get the source data into a temp dataframe. Use member column names.
         # This allows something like a dataframe to be used (like a list, dict,
         # or other dataframe. If it isn't possible to build a dataframe from what
@@ -607,19 +618,22 @@ could not be turned into a dataframe. Nothing appended.')
     # drop existing data and replace it with the specified dataframe, as long
     # as the passed in thing is a dataframe, otherwise do nothing.
     def replaceData(self, srcDf, IgnoreFirstRows = 1):
-        # This function takes a source data frame (srcDf) and replaces the 
-        # member dataframe with it, as long as srcDf is a dataframe.
-        # The column names of the source data are ignored, but 
-        # it is expected that index is or can be converted to a datetime, and the
-        # values are or can be converted to a float.  Use IgnoreFirstRows to set
-        # how many rows to throw away before merging the data. Default is 1, so as
-        # to ignore a header row. Setting IgnoreFirstRows to 0 will treat every
-        # row as data.
-        
+        """
+        This function takes a source data frame (srcDf) and replaces the
+        member dataframe with it, as long as srcDf is a dataframe.
+        The column names of the source data are ignored, but
+        it is expected that index is or can be converted to a datetime, and the
+        values are or can be converted to a float.  Use IgnoreFirstRows to set
+        how many rows to throw away before merging the data. Default is 1, so as
+        to ignore a header row. Setting IgnoreFirstRows to 0 will treat every
+        row as data.
+        """
+
         # Get the source data into a temp dataframe. Use member column names.
         # This allows something like a dataframe to be used (like a list, dict,
         # or other dataframe. If it isn't possible to build a dataframe from what
         # was passed in, print a message and punt.
+
         try:
             df_temp = pd.DataFrame(data=srcDf, columns=[self._yName])
         except ValueError:
@@ -637,56 +651,62 @@ could not be turned into a dataframe. The data was not replaced.')
         self._df = self.__filterData()
         return
 
-    # Private member function to massage a specified dataframe, and return 
-    # the resulting dataframe. 
-    # If no source data is specified, the memeber data is used as the soruce.
-    #
-    # This function assumes the source is a dataframe with at least an index and
-    # a column, or two columns, or an object that could be converted to such a
-    # thing. It will try and turn one column into a timestamp index,
-    # and another it will try turn into a float value column.
-    # Before finishing:
-    #   The timestamp will be changed to a datetime (if needed)
-    #   The value will be turned into a float (if needed)
-    #   The timestamp will be rounded to milliseconds
-    #   The dataframe will be sorted by timestamp
-    #   Duplicate timestamps will be removed, and the last value will be the one used.
-    # Additional columns are ignored/unchanged, other than rows will removed 
-    # from the additional column where the corresponding value or timestamp is
-    # NaN/NaT, or the timestamp is a duplicate.
-    #
-    # The timestamp column must be a datetime or convertible to a datetime
-    # and either needs to be the index or a value column.
-    # The value column needs to be a float or convertible to a 
-    # float.
-    #
-    # If forceColNames is true, check for correctly named columns and use them
-    # if they are present. Otherwise assume the index is the timestamp if it is
-    # a datetime, or use the 1st col as the timestamp if the index is not a
-    # datetime. Use the 2nd column as the value if the index is not a datetime,
-    # or use the 1st column as the value if the index is a datetime.
-    #
-    # If forceColNames is false (default), the timestamp name must match the
-    # string in self._tsName, and the value name must match the string in 
-    # self._yName. 
-    #
-    # Returns a DataFrame
-    #
-    # Exceptions raised:
-    #   NameError if value or timestamp column name cannot be found in the df.
-    #   TypeError if a dataframe or something like it is passed in for 
-    #       the source dataframe.
 
     def __massageData(self, srcDf=None, forceColNames=False):
+        """
+        Private member function to massage a specified dataframe, and return
+        the resulting dataframe.
+        If no source data is specified, the memeber data is used as the source.
+
+        This function assumes the source is a dataframe with at least:
+            1) an index and a column OR
+            2) two columns OR
+            3) an object that could be converted to such a thing.
+        It will try and turn one column into a timestamp index,
+        and another it will try turn into a float value column.
+        Before finishing:
+          The timestamp will be changed to a datetime (if needed)
+          The value will be turned into a float (if needed)
+          The timestamp will be rounded to milliseconds
+          The dataframe will be sorted by timestamp
+          Duplicate timestamps will be removed, and the last value will be the one used.
+
+        Additional columns are ignored/unchanged, other than rows will be removed
+        from the additional column where the corresponding value or timestamp is
+        NaN/NaT, or the timestamp is a duplicate.
+
+        The timestamp column must be a datetime or convertible to a datetime
+        and either needs to be the index or a value column.
+        The value column needs to be a float or convertible to a
+        float.
+
+        If forceColNames is true, check for correctly named columns and use them
+        if they are present. Otherwise assume the index is the timestamp if it is
+        a datetime, or use the 1st col as the timestamp if the index is not a
+        datetime. Use the 2nd column as the value if the index is not a datetime,
+        or use the 1st column as the value if the index is a datetime.
+
+        If forceColNames is false (default), the timestamp name must match the
+        string in self._tsName, and the value name must match the string in
+        self._yName.
+
+        Returns a DataFrame
+
+        Exceptions raised:
+          NameError if value or timestamp column name cannot be found in the df.
+          TypeError if a dataframe or something like it is passed in for
+              the source dataframe.
+        """
+
         # self is not defined when the default params are evaluated, so can't
-        # use srcDf=self._df 
+        # use srcDf=self._df
         # do this as a work around
         if srcDf is None:
             srcDf=self._df
-        
+
         # make sure a dataframe, or something that can be converted to
         # dataframe is passed in, otherwise leave.
-        try: 
+        try:
             df_srcTemp = pd.DataFrame(srcDf)
         except TypeError as te:
             print('    ERROR Processing ' + self._name + '.\n \
@@ -700,17 +720,17 @@ be converted to a dataframe. No data was changed.')
         dfIndex = df_srcTemp.index.name
 
         # Set the column names if they are being forced.
-        # Assume the index is the timestamp if it is a datetime, or the 
+        # Assume the index is the timestamp if it is a datetime, or the
         # 1st col is the timestamp if the index is not a datetime.
         # Use the 2nd column as the value if the index is not a datetime,
         # or use the 1st column as the value if the index is a datetime.
-        
+
         if forceColNames:
             # see if the names exist and use them if they do
             # timestamp name
             if self._tsName == dfIndex or self._tsName in dfCols:
                 # Timestamp name is the index or a column name. Nothing to do.
-                # Here for completeness and possible future use. Reorder the 
+                # Here for completeness and possible future use. Reorder the
                 # non-index case to leftmost column.
                 pass
             else:
@@ -737,14 +757,14 @@ be converted to a dataframe. No data was changed.')
                     df_srcTemp.rename(columns={dfCols[0]: self._yName}, inplace=True)
                 else:
                     df_srcTemp.rename(columns={dfCols[1]: self._yName}, inplace=True)
-            
+
             # update the column and index names
             dfCols = df_srcTemp.columns
             dfIndex = df_srcTemp.index.name
-                
+
         # If the column names were force, they should be correct and pass
         # the tests below. If not, a name error may be raised.
-        # Verify the correct column and/or index names exist. If not raise a NameError 
+        # Verify the correct column and/or index names exist. If not raise a NameError
         if not (self._yName in dfCols) or \
                 not (self._tsName in dfCols or self._tsName == dfIndex):
                     # source data column names are not as needed. Raise a name error:
@@ -759,7 +779,7 @@ needed. It is used as the value column.')
                     print('The column names found in the data are:')
                     print(dfCols)
                     raise ne
-            
+
             try:
                 if not (self._tsName in dfCols or self._tsName == dfIndex):
                     # There is no index or value column name the same as the timestamp
@@ -774,10 +794,10 @@ named "' + self._tsName + '". It is used as the timestamp.')
                 print('The index is named: "' + dfIndex + '".')
                 raise ne
 
-        # At this point the column names are as needed. The timestamp may be a 
+        # At this point the column names are as needed. The timestamp may be a
         # value column or the index.
         #
-        # Change the value column to a float if needed. Issue a warning, but 
+        # Change the value column to a float if needed. Issue a warning, but
         # do the best conversion possible in any event.
         if 'float64' != df_srcTemp[self._yName].dtype:
             try:
@@ -790,7 +810,7 @@ value into a float. The conversion did the best conversion possible.')
                 df_srcTemp[self._yName] = df_srcTemp[self._yName].astype('float',
                                                                 errors='ignore')
 
-        # As an intermediate step, we want the df_srcTemp to have the timestamp as a 
+        # As an intermediate step, we want the df_srcTemp to have the timestamp as a
         # datetime value column (not the index) so we can more easily drop dups,
         # round time, etc.  The following matrix is used to decide what to do
         # ----------------------------------------------------------------------------
@@ -816,7 +836,7 @@ value into a float. The conversion did the best conversion possible.')
         # ----------------------------------------------------------------------------
         # No            | Yes       | Yes       | No action needed here
         # ----------------------------------------------------------------------------
-      
+
         # See if there is an index and column that match the timestamp name.
         # If there is, print a message, and drop the column.
         if self._tsName == dfIndex and (self._tsName in dfCols):
@@ -839,7 +859,7 @@ and keeping the index.' )
                 # Try it with raise first and then resort to coerce if needed.
                 df_srcTemp[self._tsName] = pd.to_datetime(df_srcTemp[self._tsName],
                                                         errors='raise',
-                                                        box = True, 
+                                                        box = True,
                                                         format=self._sourceTimeFormat,
                                                         exact=False,
                                                         #infer_datetime_format = True,
@@ -851,11 +871,11 @@ rows may be missing.')
                 print(ve)
                 df_srcTemp[self._tsName] = pd.to_datetime(df_srcTemp[self._tsName],
                                                     errors='coerce',
-                                                    box = True, 
+                                                    box = True,
                                                     infer_datetime_format = True,
                                                     origin = 'unix')
 
-        # Now the column names and data types are correct.    
+        # Now the column names and data types are correct.
         # Condition the data and (re)index it.
         # Get rid of any NaN/NaT values in either column. These can be from the
         # original data or from invalid conversions to float or datetime.
@@ -878,8 +898,8 @@ rows may be missing.')
         # Set the member dataframe to the massaged data
         df_srcTemp.set_index(self._tsName, inplace=True)
 
-        # All done. Data in indexed by timestamp, and there is a correctly 
-        # named value column.  There are no NaN/NaT values, timestamps have been 
+        # All done. Data in indexed by timestamp, and there is a correctly
+        # named value column.  There are no NaN/NaT values, timestamps have been
         # rounded to mSec, and there are no duplicate timestamps.
         return df_srcTemp.sort_index(inplace=False)
 
@@ -894,10 +914,10 @@ rows may be missing.')
         # do this as a work around
         if srcDf is None:
             srcDf=self._df
-        
+
         # make sure a dataframe, or something that can be converted to a
         # dataframe is passed in, otherwise leave.
-        try: 
+        try:
             df_temp = pd.DataFrame(srcDf)
         except TypeError as te:
             print('    ERROR Processing ' + self._name + '.\n \
@@ -905,7 +925,7 @@ The private member function __filterData was not passed anything that can \
 be converted to a dataframe. No data was changed.')
             print(te)
             raise te
-                
+
         # Apply the query string if one is specified.
         # Replace "val" with the column name.
         if self._vq != '':
@@ -934,15 +954,23 @@ specified query when appending data.')
     @property
     def tsName(self):
         return self._tsName
-           
+
     @property
     def valueQuery(self):
         return self._vq
 
     @property
+    def startQuery(self):
+        return self._startQuery
+
+    @property
+    def endQuery(self):
+        return self._endQuery
+
+    @property
     def indexName(self):
         return self._df.index.name
-    
+
     @property
     def index(self):
         return self._df.index
@@ -978,5 +1006,5 @@ specified query when appending data.')
 
     @property
     def isEmpty(self):
-        return self._df.empty 
+        return self._df.empty
 
