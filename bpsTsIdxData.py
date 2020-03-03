@@ -615,8 +615,6 @@ could not be turned into a dataframe. Nothing appended.')
         self._df.sort_index(inplace=True)
         return
 
-    # drop existing data and replace it with the specified dataframe, as long
-    # as the passed in thing is a dataframe, otherwise do nothing.
     def replaceData(self, srcDf, IgnoreFirstRows = 1):
         """
         This function takes a source data frame (srcDf) and replaces the
@@ -905,10 +903,13 @@ rows may be missing.')
 
         # end of def __massageData(self, srcDf):
 
-    # Private member function to apply the value query and the timestamp filter
-    # to a specified dataframe, and return the resulting dataframe.
-    # If no source dataframe is specified, the member dataframe is used.
     def __filterData(self, srcDf=None):
+        """
+        Private member function to apply the value query and the timestamp filter
+        to a specified dataframe, and return the resulting dataframe.
+        If no source dataframe is specified, the member dataframe is used.
+        """
+
         # self is not defined when the default params are evaluated, so can't
         # use srcDf=self._df
         # do this as a work around
