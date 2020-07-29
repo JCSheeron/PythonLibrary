@@ -21,11 +21,11 @@ from math import floor, ceil, log10
 # oomCeil(3521.7, 2) returns 3600, oomCeil(3521.7, 1) returns 3530,
 # and oomCeil(3521.7, 4) returns 10000
 # Negative magnitude values are used for values between 0 and 1 or 0 and -1.
-# oomCeil(0.0031) returns 1, but
+# oomCeil(0.0031) returns 0.004
 # oomCeil(0.0031, -3) returns 0.004
 # oomCeil(0.0031, -2) returns 0.01
 # oomCeil(0.0031, -1) returns 0.1
-# oomCeil(0.0031, -4) returns 0.0031, same for more negative values of mag.
+# oomCeil(0.0031, -4) returns 0.0031
 def oomCeil(val, mag=None):
     '''Return value rounded up to the next value with the same or the specified order of magnitude.'''
     # Make sure val can be converted to a float.  Raise if not.
@@ -68,11 +68,13 @@ def oomCeil(val, mag=None):
 # oomFloor(3521.7, 2) returns 3500, oomFloor(3521.7, 1) returns 3520,
 # oomFloor(3521.7, 4) returns 0, oomFloor(8521.7, 4) returns 0
 # Negative magnitude values are used for values between 0 and 1 or 0 and -1.
-# oomFloor(0.0031) returns 0.003, but
-# oomFloor(0.0031, -3) returns 0.003
+# Because imprecision of floating numbers, values may vary from what is expected when
+# dealing with small values, especially out to many decimal places.
+# oomFloor(0.00399) returns 0.003
+# oomFloor(0.00399, -3) returns 0.003
 # oomFloor(0.0031, -2) returns 0.0
 # oomFloor(0.0031, -1) returns 0.0
-# oomFloor(0.0031, -4) returns 0.0031, same for more negative values of mag.
+# oomFloor(0.00399, -4) returns 0.0039
 def oomFloor(val, mag=None):
     '''Return value rounded down to the next value with the same or the specified order of magnitude.'''
     # Make sure val can be converted to a float.  Raise if not.
@@ -115,11 +117,11 @@ def oomFloor(val, mag=None):
 # oomRound(3521.7, 2) returns 3600, oomRound(3521.7, 1) returns 3530,
 # and oomRound(3521.7, 4) returns 10000
 # Negative magnitude values are used for values between 0 and 1 or 0 and -1.
-# oomRound(0.0067) returns 1, but
+# oomRound(0.0067) returns 0.007
 # oomRound(0.0067, -3) returns 0.007
 # oomRound(0.0067, -2) returns 0.01
 # oomRound(0.0067, -1) returns 0.0
-# oomRound(0.0067, -4) returns 0.0067, same for more negative values of mag.
+# oomRound(0.0067, -4) returns 0.0067
 def oomRound(val, mag=None):
     '''Return value rounded up to the next value with the same or the specified order of magnitude.'''
     # Make sure val can be converted to a float.  Raise if not.
@@ -158,10 +160,10 @@ def oomRound(val, mag=None):
 # It removes trailing .0 if the coefficient is an integer,
 # it only displays non-zero coefficients,
 # and if a coefficient is 1, it is left off.
-# By default, cdir=0, the coefficient array is assumed to be in order
-# of decending power (highest power first). If direction <> 0, then
-# the coefficient array is assumed to be in order of ascending power (lowest
-# power first).
+# By default, cdir=0, (coefficient direction) the coefficient array
+# is assumed to be in order of decending power (highest power first).
+# If direction <> 0, then the coefficient array is assumed to be in
+# order of ascending power (lowest power first).
 # The returned string will always print in decending power (highest order
 # coefficients first).
 # precision is used to control how may decimal places are included
