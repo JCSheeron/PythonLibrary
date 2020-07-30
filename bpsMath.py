@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # bpsMath.py
 # Math funcitons
+#   oom(val)
 #   oomCeil(val, mag=None)
 #   oomFloor(val, mag=None)
 #   oomRound(val, mag=None)
@@ -9,6 +10,38 @@
 #
 from math import floor, ceil, log10
 #
+# Order of Magnatude (oom)
+# Return the order of magnatude of a value. Use the absolute value so
+# Examples
+# oom(1805) returns 3
+# oom(40050) returns 4
+# oom(-325) returns 2
+# oom(7) returns 0
+# oom(0.6) returns -1
+# oom(-0.9875) returns -1
+# oom(0.003) returns -3
+# oom(-0.0008344) returns -4
+def oom(val):
+    '''Return the order of magnatude of a value.'''
+    # Make sure val can be converted to a float.
+    try:
+        value = float(val)
+    except ValueError as ve:
+        print('The value parameter must be a float, or convertable to a float.')
+        print(ve)
+        return None
+
+    # Get the order of magnitude of value.
+    # Log of 0 is meaningless, so deal with this special case -- treat it
+    # like a log of 1 (= 0). Use the absolute value so the oom reflects the
+    # magnatude for negative values as well (log of a negative is an imaginary
+    # number
+    if val == 0:
+        return 0
+    else:
+        return floor(log10(abs(value)))
+
+
 # Order of Magnatude (oom) ceiling
 # Round value up to the next value with the same order of magnatude.
 # If an order of magnatude is specified, it will be used, as long as it makes
@@ -151,8 +184,6 @@ def oomRound(val, mag=None):
     # Finally, caculate the oom round
     multiple = 10**oom
     return round(value/multiple) * multiple
-
-
 
 # Given an array of coefficients, p, return a nicely formatted
 # polynomial string in the form:
