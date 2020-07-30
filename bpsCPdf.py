@@ -52,6 +52,7 @@ class cPdf(FPDF):
 
         # capture the header text, and footer info
         self._headerText = str(headerText)
+        # allow an empty string to suppress the footer
         if footerText is not None:
             self._footerText = str(footerText)
         else:
