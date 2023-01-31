@@ -6,8 +6,32 @@
 from typing import Optional
 
 # Date and Time related functions
-from datetime import datetime
+from datetime import datetime, time as dttime
 from dateutil import parser as duparser
+
+
+# def adjMissingTime(dt: datetime, ts: Optional[dttime] = dttime.max) -> datetime:
+def adjMissingTime(dt: datetime, ts: dttime = dttime.max) -> datetime:
+    """Adjust the time if missing.
+
+    Return a datetime with date information that matches the specified
+    datetime (dt), but with time informaiton that matches the specified time (ts).
+    The time defaults to one moment before midnight, such that if the functions
+    is called without ts being specified, dt will be adjusted to be midnight.
+
+    This is useful for "end dates" such that the associated time will span the
+    entire day.
+    """
+    # check for time info to be all zeros (midnight) and force to the specified time in this case.
+    if dt.time() == dttime():
+        if ts is not None and isinstance(ts, dttime):
+            dt = dt.replace(
+                hour=ts.hour,
+                minute=ts.minute,
+                second=ts.second,
+                microsecond=ts.microsecond,
+            )
+    return dt
 
 
 def getAuxDates(
@@ -46,15 +70,18 @@ def getAuxDates(
 
     Where "'" denotes a possibly modified value.
 
-    Note that non-sensical end time return values that are < the start time
-    returned values are avoided. The returned start time takes priority, and
-    the returned end time is guaranteed to be >= the returned start time.
-    Note that reversed startDt and endDt is corrected before applying the above
-    table. Similarly, reversed auxStatDt and auxEndDt are reversed before applying
-    the above table.
+    Note that reversed start and end times are corrected by modifying the end
+    time such that the end time will be >= start time, before
+    the above table is applied.
+    Similarly, reversed auxStartDt and auxEndDt are corrected by modifying the
+    auxEndDt such that the auxEndDt >= auxStartDt before the above table is
+    applied. In practice, this will mean that reversed start and end times will
+    result in a 1 day range, starting and ending with the start date.
     """
     # Convet the arguments to internal datetimes, or use None. This acts to
     # validate the argumens, and convert them so datetime min/max can be used.
+    # For end times, if there is no time info, force the time to midnight, so
+    # if a date is specified, the entire date is included.
     if startDt is not None:
         try:
             # _st = datetime.strptime(startDt, dtFormat)
@@ -66,8 +93,8 @@ def getAuxDates(
 
     if endDt is not None:
         try:
-            # _et = datetime.strptime(endDt, dtFormat)
             _et = duparser.parse(endDt, fuzzy=True)
+            _et = adjMissingTime(_et)
         except (ValueError, TypeError):
             _et = None
     else:
@@ -84,8 +111,8 @@ def getAuxDates(
 
     if auxEndDt is not None:
         try:
-            # _auxEt = datetime.strptime(auxEndDt, dtFormat)
             _auxEt = duparser.parse(auxEndDt, fuzzy=True)
+            _auxEt = adjMissingTime(_auxEt)
         except (ValueError, TypeError):
             _auxEt = None
     else:
@@ -103,14 +130,9 @@ def getAuxDates(
         and _auxSt is not None
         and _auxEt is not None
     ):
-        # sort the st/et in case dates were entered backwards,
-        # and similarly sort auxSt and auxEt.
-        dtList = [_st, _et]
-        dtList.sort()
-        _st, _et = dtList
-        dtList = [_auxSt, _auxEt]
-        dtList.sort()
-        _auxSt, _auxEt = dtList
+        # make sure the end date is not before the start date (start date prioirty)
+        _et = max([_st, _et])
+        _auxEt = max([_auxSt, _auxEt])
         # now range check the dates
         _auxSt = max([_st, _auxSt])
         _auxEt = max([_auxSt, _auxEt])
@@ -123,11 +145,8 @@ def getAuxDates(
     elif _st is None and _et is None and _auxSt is None and _auxEt is not None:
         return (None, _auxEt)
     elif _st is None and _et is None and _auxSt is not None and _auxEt is not None:
-        # sort the st/et in case dates were entered backwards
-        dtList = [_auxSt, _auxEt]
-        dtList.sort()
-        _auxSt, _auxEt = dtList
-        # now range check
+        # make sure the end date is not before the start date (start date prioirty)
+        # and range check
         _auxEt = max([_auxSt, _auxEt])
         return (_auxSt, _auxEt)
     elif _st is not None and _et is None and _auxSt is None and _auxEt is None:
@@ -138,13 +157,10 @@ def getAuxDates(
         _auxEt = max([_st, _auxEt])
         return (_st, _auxEt)
     elif _st is not None and _et is None and _auxSt is not None and _auxEt is not None:
-        # sort the st/et in case dates were entered backwards
-        dtList = [_auxSt, _auxEt]
-        dtList.sort()
-        _auxSt, _auxEt = dtList
+        # make sure the end date is not before the start date (start date prioirty)
+        _auxEt = max([_auxSt, _auxEt])
         # now range check
         _auxSt = max([_st, _auxSt])
-        _auxEt = max([_auxSt, _auxEt])
         return (_auxSt, _auxEt)
     elif _st is None and _et is not None and _auxSt is None and _auxEt is None:
         return (None, _et)
@@ -154,10 +170,7 @@ def getAuxDates(
     elif _st is None and _et is not None and _auxSt is None and _auxEt is not None:
         return (None, min([_et, _auxEt]))
     elif _st is None and _et is not None and _auxSt is not None and _auxEt is not None:
-        # sort the st/et in case dates were entered backwards
-        dtList = [_auxSt, _auxEt]
-        dtList.sort()
-        _auxSt, _auxEt = dtList
+        # make sure the end date is not before the start date (start date prioirty)
         # now range check
         _auxEt = max([_auxSt, _auxEt])
         _et = max([_auxEt, _et])
