@@ -35,7 +35,11 @@ def adjMissingTime(dt: datetime, ts: dttime = dttime.max) -> datetime:
 
 
 def getAuxDates(
-    startDt=None, endDt=None, auxStartDt=None, auxEndDt=None
+    startDt=None,
+    endDt=None,
+    auxStartDt=None,
+    auxEndDt=None,
+    adjustEndTimes: bool = False,
 ) -> tuple[Optional[datetime], Optional[datetime]]:
     """Return a (datetime, datetime) tuple that has aux start/end times.
 
@@ -80,11 +84,11 @@ def getAuxDates(
     """
     # Convet the arguments to internal datetimes, or use None. This acts to
     # validate the argumens, and convert them so datetime min/max can be used.
-    # For end times, if there is no time info, force the time to midnight, so
-    # if a date is specified, the entire date is included.
+    # For end times, if adjustEndTimes argument is True, and if there is no
+    # time info, force the time to midnight, so if only a date is specified,
+    # the entire date is included.
     if startDt is not None:
         try:
-            # _st = datetime.strptime(startDt, dtFormat)
             _st = duparser.parse(startDt, fuzzy=True)
         except (ValueError, TypeError):
             _st = None
@@ -94,7 +98,8 @@ def getAuxDates(
     if endDt is not None:
         try:
             _et = duparser.parse(endDt, fuzzy=True)
-            _et = adjMissingTime(_et)
+            if adjustEndTimes:  # adjust end time if arg is set
+                _et = adjMissingTime(_et)
         except (ValueError, TypeError):
             _et = None
     else:
@@ -102,7 +107,6 @@ def getAuxDates(
 
     if auxStartDt is not None:
         try:
-            # _auxSt = datetime.strptime(auxStartDt, dtFormat)
             _auxSt = duparser.parse(auxStartDt, fuzzy=True)
         except (ValueError, TypeError):
             _auxSt = None
@@ -112,14 +116,16 @@ def getAuxDates(
     if auxEndDt is not None:
         try:
             _auxEt = duparser.parse(auxEndDt, fuzzy=True)
-            _auxEt = adjMissingTime(_auxEt)
+            if adjustEndTimes:  # adjust end time if arg is set
+                _auxEt = adjMissingTime(_auxEt)
         except (ValueError, TypeError):
             _auxEt = None
     else:
         _auxEt = None
 
-    # at this point, st, et, auxSt, and auxEt are either None or legit dates. Bust moves and
-    # get on with it. Determine the tuple values per the table in the docstring.
+    # at this point, st, et, auxSt, and auxEt are either None or legit dates.
+    # Bust moves and get on with it.
+    # Determine the tuple values per the table in the docstring.
     # Make sure the returned end time is not before the returned start time.
     #
     # This first test case is the end of the table in the docstring,
@@ -130,13 +136,14 @@ def getAuxDates(
         and _auxSt is not None
         and _auxEt is not None
     ):
-        # make sure the end date is not before the start date (start date prioirty)
-        _et = max([_st, _et])
-        _auxEt = max([_auxSt, _auxEt])
-        # now range check the dates
+        # Make sure the end date is not before the start date (start date prioirty)
         _auxSt = max([_st, _auxSt])
-        _auxEt = max([_auxSt, _auxEt])
         _auxEt = min([_auxEt, _et])
+        _auxEt = max([_auxSt, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
         return (_auxSt, _auxEt)
     elif _st is None and _et is None and _auxSt is None and _auxEt is None:
         return (None, None)
@@ -148,6 +155,10 @@ def getAuxDates(
         # make sure the end date is not before the start date (start date prioirty)
         # and range check
         _auxEt = max([_auxSt, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
         return (_auxSt, _auxEt)
     elif _st is not None and _et is None and _auxSt is None and _auxEt is None:
         return (_st, None)
@@ -155,36 +166,72 @@ def getAuxDates(
         return (max([_st, _auxSt]), None)
     elif _st is not None and _et is None and _auxSt is None and _auxEt is not None:
         _auxEt = max([_st, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
         return (_st, _auxEt)
     elif _st is not None and _et is None and _auxSt is not None and _auxEt is not None:
         # make sure the end date is not before the start date (start date prioirty)
-        _auxEt = max([_auxSt, _auxEt])
-        # now range check
         _auxSt = max([_st, _auxSt])
+        _auxEt = max([_auxSt, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
         return (_auxSt, _auxEt)
     elif _st is None and _et is not None and _auxSt is None and _auxEt is None:
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _et = adjMissingTime(_et)
         return (None, _et)
     elif _st is None and _et is not None and _auxSt is not None and _auxEt is None:
         _et = max([_auxSt, _et])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _et = adjMissingTime(_et)
         return (_auxSt, _et)
     elif _st is None and _et is not None and _auxSt is None and _auxEt is not None:
-        return (None, min([_et, _auxEt]))
+        _auxEt = min([_et, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
+        return (None, _auxEt)
     elif _st is None and _et is not None and _auxSt is not None and _auxEt is not None:
         # make sure the end date is not before the start date (start date prioirty)
         # now range check
+        _auxEt = min([_et, _auxEt])
         _auxEt = max([_auxSt, _auxEt])
-        _et = max([_auxEt, _et])
-        return (_auxSt, min([_et, _auxEt]))
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
+        return (_auxSt, _auxEt)
     elif _st is not None and _et is not None and _auxSt is None and _auxEt is None:
-        _et = max([_st, _et])
-        return (_st, _et)
+        _auxEt = max([_st, _et])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
+        return (_st, _auxEt)
     elif _st is not None and _et is not None and _auxSt is not None and _auxEt is None:
         _auxSt = max([_st, _auxSt])
-        _et = max([_auxSt, _et])
-        return (_auxSt, _et)
+        _auxEt = max([_auxSt, _et])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
+        return (_auxSt, _auxEt)
     elif _st is not None and _et is not None and _auxSt is None and _auxEt is not None:
         _auxEt = min([_et, _auxEt])
         _auxEt = max([_st, _auxEt])
+        # Set the time element of the end date to be midnight if there
+        # isn't a time specified, and the argument is set
+        if adjustEndTimes:
+            _auxEt = adjMissingTime(_auxEt)
         return (_st, _auxEt)
     else:  # every case should be covered by the above. Should never get here ...
         return (None, None)
