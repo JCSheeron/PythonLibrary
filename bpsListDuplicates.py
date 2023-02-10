@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# listDuplicates.py
+# bpsListDuplicates.py
 # Funcitons for dealing with duplicate values in lists
 # NOTE: DEPRECATED!!!
 # Use bpsList library instead. This file in kept for backward compatability, but
