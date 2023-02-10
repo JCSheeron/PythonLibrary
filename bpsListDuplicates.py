@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 # listDuplicates.py
 # Funcitons for dealing with duplicate values in lists
+# NOTE: DEPRECATED!!!
+# Use bpsList library instead. This file in kept for backward compatability, but
+# new functions and changes are not added. The bpsList library includes the original
+# listDuplicates and listToListIntersection funcitons, but also includes others.
 #
 # Return a list of duplicate values
 def listDuplicates(seq):
@@ -9,8 +13,10 @@ def listDuplicates(seq):
     try:
         srcList = list(seq)
     except ValueError as ve:
-        print('ERROR: listDuplicates function must be passed a list or something \
-convertable to a list.')
+        print(
+            "ERROR: listDuplicates function must be passed a list or something \
+convertable to a list."
+        )
         print(ve)
         return None
 
@@ -22,26 +28,29 @@ convertable to a list.')
     # covert to a set and return
     return list(seen_twice)
 
+
 # Return a list of values found in both lists
 def listToListIntersection(seqA, seqB):
     # Make sure listA and ListB can be a list. Message and out if not.
     try:
         srcListA = list(seqA)
     except ValueError as ve:
-        print('ERROR: listToListIntersection function must be passed two list \
+        print(
+            "ERROR: listToListIntersection function must be passed two list \
 objects, or two obejcts that can be converted to lists.  This is not the case \
-for the 1st argument.')
+for the 1st argument."
+        )
         print(ve)
         return None
-    
     try:
         srcListB = list(seqB)
     except ValueError as ve:
-        print('ERROR: listToListIntersection function must be passed two list \
+        print(
+            "ERROR: listToListIntersection function must be passed two list \
 objects, or two obejcts that can be converted to lists.  This is not the case \
-for the 2nd argument.')
+for the 2nd argument."
+        )
         print(ve)
         return None
     # return a list of common values.
     return list(set(srcListA).intersection(srcListB))
-    

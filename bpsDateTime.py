@@ -51,6 +51,20 @@ def getAuxDates(
     Return None if there is no information (no argument provided, or
     argument is not convertible to a datetime).
 
+    Note that reversed start and end times are corrected by modifying the end
+    time such that the end time will be >= start time, before
+    the above table is applied.
+    Similarly, reversed auxStartDt and auxEndDt are corrected by modifying the
+    auxEndDt such that the auxEndDt >= auxStartDt before the above table is
+    applied. In practice, this will mean that reversed start and end times will
+    result in a 1 day range, starting and ending with the start date.
+
+    Note the adjsutEndTimes argument that defaults to False. If this argument is
+    true, it will set end datetimes to 23:59:59.999 if there is only date informaiton
+    applied (i.e. no time information or in other words a time of 00:00:00). This
+    is so that an end date supplied without a time will be modified to include the
+    entire day.
+
     Return tuple values are per the table below:
 
     | ST   | ET   | AuxST | AuxET |  Return          | Notes
@@ -74,13 +88,6 @@ def getAuxDates(
 
     Where "'" denotes a possibly modified value.
 
-    Note that reversed start and end times are corrected by modifying the end
-    time such that the end time will be >= start time, before
-    the above table is applied.
-    Similarly, reversed auxStartDt and auxEndDt are corrected by modifying the
-    auxEndDt such that the auxEndDt >= auxStartDt before the above table is
-    applied. In practice, this will mean that reversed start and end times will
-    result in a 1 day range, starting and ending with the start date.
     """
     # Convet the arguments to internal datetimes, or use None. This acts to
     # validate the argumens, and convert them so datetime min/max can be used.
