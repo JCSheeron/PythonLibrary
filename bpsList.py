@@ -10,7 +10,7 @@
 def listChunk(seq, chunkSize):
     """Given a list, return a list of lists broken into the specified chunk size.
 
-    If seq cannot be converted to a list, return None.
+    If seq cannot be converted to a list, return an empty list.
     If chuckSizse cannot be converted to an integer, return the original list."""
 
     # Make sure sequence can be turned into a list. Message and out if not.
@@ -22,7 +22,7 @@ def listChunk(seq, chunkSize):
 convertable to a list. No list to return."
         )
         print(ve)
-        return None
+        return list()
 
     try:
         n = int(chunkSize)
