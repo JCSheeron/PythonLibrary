@@ -10,7 +10,6 @@ from datetime import datetime, time as dttime
 from dateutil import parser as duparser
 
 
-# def adjMissingTime(dt: datetime, ts: Optional[dttime] = dttime.max) -> datetime:
 def adjMissingTime(dt: datetime, ts: dttime = dttime.max) -> datetime:
     """Adjust the time if missing.
 
@@ -59,7 +58,7 @@ def getAuxDates(
     applied. In practice, this will mean that reversed start and end times will
     result in a 1 day range, starting and ending with the start date.
 
-    Note the adjsutEndTimes argument that defaults to False. If this argument is
+    Note the adjustEndTimes argument that defaults to False. If this argument is
     true, it will set end datetimes to 23:59:59.999 if there is only date informaiton
     applied (i.e. no time information or in other words a time of 00:00:00). This
     is so that an end date supplied without a time will be modified to include the
@@ -89,44 +88,63 @@ def getAuxDates(
     Where "'" denotes a possibly modified value.
 
     """
-    # Convet the arguments to internal datetimes, or use None. This acts to
-    # validate the argumens, and convert them so datetime min/max can be used.
+    # Use the time arguments if they are already datetimes, or convet the
+    # arguments to internal datetimes, or use None. This acts to validate the
+    # argumens, and convert them so datetime min/max can be used.
     # For end times, if adjustEndTimes argument is True, and if there is no
     # time info, force the time to midnight, so if only a date is specified,
     # the entire date is included.
     if startDt is not None:
-        try:
-            _st = duparser.parse(startDt, fuzzy=True)
-        except (ValueError, TypeError):
-            _st = None
+        if isinstance(startDt, datetime):
+            _st = startDt
+        else:
+            try:
+                _st = duparser.parse(startDt, fuzzy=True)
+            except (ValueError, TypeError):
+                _st = None
     else:
         _st = None
 
     if endDt is not None:
-        try:
-            _et = duparser.parse(endDt, fuzzy=True)
+        if isinstance(endDt, datetime):
+            _et = endDt
             if adjustEndTimes:  # adjust end time if arg is set
                 _et = adjMissingTime(_et)
-        except (ValueError, TypeError):
-            _et = None
+        else:
+            try:
+                _et = duparser.parse(endDt, fuzzy=True)
+                if adjustEndTimes:  # adjust end time if arg is set
+                    _et = adjMissingTime(_et)
+            except (ValueError, TypeError):
+                _et = None
     else:
         _et = None
 
     if auxStartDt is not None:
-        try:
-            _auxSt = duparser.parse(auxStartDt, fuzzy=True)
-        except (ValueError, TypeError):
-            _auxSt = None
+        if isinstance(auxStartDt, datetime):
+            _auxSt = auxStartDt
+        else:
+            try:
+                _auxSt = duparser.parse(auxStartDt, fuzzy=True)
+            # except ValueError, TypeError):
+            except (ValueError, TypeError):
+                _auxSt = None
     else:
         _auxSt = None
 
     if auxEndDt is not None:
-        try:
-            _auxEt = duparser.parse(auxEndDt, fuzzy=True)
+        if isinstance(auxEndDt, datetime):
+            _auxEt = auxEndDt
             if adjustEndTimes:  # adjust end time if arg is set
                 _auxEt = adjMissingTime(_auxEt)
-        except (ValueError, TypeError):
-            _auxEt = None
+        else:
+            try:
+                _auxEt = duparser.parse(auxEndDt, fuzzy=True)
+                if adjustEndTimes:  # adjust end time if arg is set
+                    _auxEt = adjMissingTime(_auxEt)
+                print(_auxEt)
+            except (ValueError, TypeError):
+                _auxEt = None
     else:
         _auxEt = None
 
