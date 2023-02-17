@@ -6,6 +6,7 @@
 #
 # system related
 import sys
+
 # date and time stuff
 from datetime import datetime, time
 from pandas.tseries.frequencies import to_offset
@@ -14,6 +15,7 @@ from dateutil import parser as duparser
 # numerical manipulation libraries
 import numpy as np
 import pandas as pd
+
 
 class TsIdxData(object):
     """
@@ -155,30 +157,38 @@ class TsIdxData(object):
             boolean true if data frame is empty
     """
 
-    def __init__(self, name, tsName=None, yName=None, df=None,
-            valueQuery=None, startQuery=None, endQuery=None,
-            sourceTimeFormat='%m/%d/%Y %H:%M:%S.%f',
-            forceColNames=False):
-        self._name = str(name) # use the string version
+    def __init__(
+        self,
+        name,
+        tsName=None,
+        yName=None,
+        df=None,
+        valueQuery=None,
+        startQuery=None,
+        endQuery=None,
+        sourceTimeFormat="%m/%d/%Y %H:%M:%S.%f",
+        forceColNames=False,
+    ):
+        self._name = str(name)  # use the string version
         """ TsIdxData constructor (ctor). Details are in above class description."""
         # default x-axis (timestamp) label to 'timestamp' if nothing is specified
         if tsName is None:
-            self._tsName = 'timestamp'
+            self._tsName = "timestamp"
         else:
-           self._tsName = str(tsName) # use the string version
+            self._tsName = str(tsName)  # use the string version
 
         # default the y-axis label to the name if nothing is specified
         if yName is None:
             self._yName = name
         else:
-           self._yName = str(yName) # use the string version
+            self._yName = str(yName)  # use the string version
 
         # Keep the column (header) names as a property
         self._columns = [self._tsName, self._yName]
 
         # Default the value query to empty if not specified.
         if valueQuery is None:
-            self._vq = ''
+            self._vq = ""
         else:
             # something specified for the value  query string (vq)
             # make sure it is a string, and convert to lower case
@@ -202,15 +212,17 @@ class TsIdxData(object):
                 try:
                     self._startQuery = duparser.parse(startQuery, fuzzy=True)
                     # convert to a pandas datetime for max compatibility
-                    self._startQuery = pd.to_datetime(self._startQuery,
-                                            #format='%m/%d/%Y %I:%M:%S %p',
-                                            errors='raise',
-                                            box=True,
-                                            infer_datetime_format=True,
-                                            origin='unix')
+                    self._startQuery = pd.to_datetime(
+                        self._startQuery,
+                        # format='%m/%d/%Y %I:%M:%S %p',
+                        errors="raise",
+                        box=True,
+                        infer_datetime_format=True,
+                        origin="unix",
+                    )
                 except (ValueError, OverflowError) as voe:
                     # not convertable ... invalid ... ignore
-                    print('    WARNING: Invalid start query. Ignoring.')
+                    print("    WARNING: Invalid start query. Ignoring.")
                     print(voe)
                     self._startQuery = None
             else:
@@ -230,20 +242,23 @@ class TsIdxData(object):
                     self._endQuery = duparser.parse(endQuery, fuzzy=True)
                     # If and end time was not specified, force it to the end
                     # of the day so the entire date is included.
-                    if self._endQuery.time() == time(0,0,0,0):
-                        self._endQuery = self._endQuery.replace(hour=23, minute=59,
-                                                  second=59, microsecond=999999)
+                    if self._endQuery.time() == time(0, 0, 0, 0):
+                        self._endQuery = self._endQuery.replace(
+                            hour=23, minute=59, second=59, microsecond=999999
+                        )
 
                     # convert to a pandas datetime for max compatibility
-                    self._endQuery = pd.to_datetime(self._endQuery,
-                                                    #format='%m/%d/%Y %I:%M:%S %p',
-                                                    errors='raise',
-                                                    box=True,
-                                                    infer_datetime_format=True,
-                                                    origin='unix')
+                    self._endQuery = pd.to_datetime(
+                        self._endQuery,
+                        # format='%m/%d/%Y %I:%M:%S %p',
+                        errors="raise",
+                        box=True,
+                        infer_datetime_format=True,
+                        origin="unix",
+                    )
                 except (ValueError, OverflowError) as voe:
                     # not convertable ... invalid ... ignore
-                    print('    WARNING: Invalid end query. Ignoring.')
+                    print("    WARNING: Invalid end query. Ignoring.")
                     print(voe)
                     self._endQuery = None
             else:
@@ -252,15 +267,19 @@ class TsIdxData(object):
 
                 # If and end time was not specified, force it to the end
                 # of the day so the entire date is included.
-                if self._endQuery.time() == time(0,0,0,0):
-                    self._endQuery = self._endQuery.replace(hour=23, minute=59,
-                                              second=59, microsecond=999999)
+                if self._endQuery.time() == time(0, 0, 0, 0):
+                    self._endQuery = self._endQuery.replace(
+                        hour=23, minute=59, second=59, microsecond=999999
+                    )
 
                 # convert to a pandas datetime for max compatibility
-                self._endQuery = pd.to_datetime(self._endQuery, errors='coerce',
-                                        box=True,
-                                        infer_datetime_format=True,
-                                        origin='unix')
+                self._endQuery = pd.to_datetime(
+                    self._endQuery,
+                    errors="coerce",
+                    box=True,
+                    infer_datetime_format=True,
+                    origin="unix",
+                )
 
         # make sure the source time format is a string
         self._sourceTimeFormat = str(sourceTimeFormat)
@@ -274,10 +293,13 @@ class TsIdxData(object):
         try:
             self._df = pd.DataFrame(df)
         except ValueError as ve:
-            print('    WARNING: The data specified when building ' + self.name \
-+ ' cannot be used to make a dataframe.  An empty dataframe is being used.')
+            print(
+                "    WARNING: The data specified when building "
+                + self.name
+                + " cannot be used to make a dataframe.  An empty dataframe is being used."
+            )
             print(ve)
-            self._df = None # so that an empty dataframe will be used below
+            self._df = None  # so that an empty dataframe will be used below
 
         if df is None or self._df is None:
             # No (valid) source specified ...
@@ -286,13 +308,15 @@ class TsIdxData(object):
             # create an empty data frame with the column names
             self._df = pd.DataFrame(columns=[self._tsName, self._yName])
             # force the columns to have the data types of datetime and float
-            self._df[self._yName] = self._df[self._yName].astype('float',
-                                                    errors='ignore')
+            self._df[self._yName] = self._df[self._yName].astype(
+                "float", errors="ignore"
+            )
 
             # force the timestamp to a datetime
             # should not raise an error, as there is no data
-            self._df[self._tsName] = pd.to_datetime(self._df[self._tsName],
-                                                    errors='coerce')
+            self._df[self._tsName] = pd.to_datetime(
+                self._df[self._tsName], errors="coerce"
+            )
             # set the timestamp as the index
             self._df.set_index(self._tsName, inplace=True)
 
@@ -314,13 +338,17 @@ class TsIdxData(object):
                 # try the inferred frequency
                 inferFreq = pd.infer_freq(self._df.index)
             except TypeError as te:
-                print('    WARNING: Timestamp column does not appear to be a datetime. \n \
-Cannot infer a frequency. Will try to do so manually by comparing the first few values.')
+                print(
+                    "    WARNING: Timestamp column does not appear to be a datetime. \n \
+Cannot infer a frequency. Will try to do so manually by comparing the first few values."
+                )
                 print(te)
                 inferFreq = None
             except ValueError as ve:
-                print('    WARNING: There are not enough timestamps to infer a frequency. \n \
-Will try to do so manually by comparing the first few values.')
+                print(
+                    "    WARNING: There are not enough timestamps to infer a frequency. \n \
+Will try to do so manually by comparing the first few values."
+                )
                 print(ve)
                 inferFreq = None
             finally:
@@ -329,29 +357,38 @@ Will try to do so manually by comparing the first few values.')
                 # repeated, it looks like the odd/even rows in that order are
                 # repeated.
                 if inferFreq is None or inferFreq == pd.Timedelta(0):
-                    print('    WARNING: Data may have very few, skipped, missing, repeated or corrupted timestamps.\n \
-Determining sampling frequency manually.')
+                    print(
+                        "    WARNING: Data may have very few, skipped, missing, repeated or corrupted timestamps.\n \
+                    Determining sampling frequency manually."
+                    )
                     # Use 3 and 4 if possible, just in case there is
                     # something strange in the beginning. Otherwise, use entries 0
                     # and 1, or give up, and use 1 second.
                     if len(self._df.index) >= 4:
-                        inferFreq = pd.Timedelta((self._df.index[3] -
-                                                  self._df.index[2]))
+                        inferFreq = pd.Timedelta(
+                            (self._df.index[3] - self._df.index[2])
+                        )
                     elif len(self._df.index) >= 2:
-                        inferFreq = pd.Timedelta((self._df.index[1] - self._df.index[0]))
+                        inferFreq = pd.Timedelta(
+                            (self._df.index[1] - self._df.index[0])
+                        )
                     else:
-                        print('    WARNING: Not enough data to determine the \
-data frequency. Using 1 sec.')
-                        inferFreq = pd.Timedelta('1S')
+                        print(
+                            "    WARNING: Not enough data to determine the \
+data frequency. Using 1 sec."
+                        )
+                        inferFreq = pd.Timedelta("1S")
 
                 # At this point, there is value for inferred frequency,
                 # but there may be repeated times due to sub-second times being
                 # truncated.  If this happens, the time delta will be 0. Deal
                 # with it by forcing 1 second
                 if inferFreq == pd.Timedelta(0):
-                    print('    WARNING: Two rows have the same timestamp. \
-Assuming a 1 second data frequency.')
-                    inferFreq = pd.Timedelta('1S')
+                    print(
+                        "    WARNING: Two rows have the same timestamp. \
+Assuming a 1 second data frequency."
+                    )
+                    inferFreq = pd.Timedelta("1S")
 
                 # Frequency is ready. Convert it and store it as a time offset.
                 self._timeOffset = to_offset(inferFreq)
@@ -359,26 +396,32 @@ Assuming a 1 second data frequency.')
             # ctor all done!
 
     def __repr__(self):
-        outputMsg=  '{:13} {}'.format('\nName: ', self._name + '\n')
+        outputMsg = "{:13} {}".format("\nName: ", self._name + "\n")
         if self.isEmpty:
-            outputMsg+= 'Contains no data!\n'
-            outputMsg+= '{:13} {}'.format('Length: ', str(self.count) + '\n')
-            return (outputMsg)
+            outputMsg += "Contains no data!\n"
+            outputMsg += "{:13} {}".format("Length: ", str(self.count) + "\n")
+            return outputMsg
         else:
-            outputMsg+= '{:13} {:18} {:10} {}'.format('Index: ', self._df.index.name, \
-'datatype: ', str(self._df.index.dtype) + '\n')
-            outputMsg+= 'Columns:\n'
+            outputMsg += "{:13} {:18} {:10} {}".format(
+                "Index: ",
+                self._df.index.name,
+                "datatype: ",
+                str(self._df.index.dtype) + "\n",
+            )
+            outputMsg += "Columns:\n"
             for col in self.columns:
-                outputMsg+= '{:4} {:15} {} {}'.format(' ', col, self.columns[col], '\n')
-            outputMsg+= '{:13} {}'.format('Value Query: ', self._vq + '\n')
-            outputMsg+= '{:13} {}'.format('Start Time: ', str(self.startTs) + '\n')
-            outputMsg+= '{:13} {}'.format('End Time: ', str(self.endTs) + '\n')
-            outputMsg+= '{:13} {}'.format('Period: ', str(self._timeOffset) + '\n')
-            outputMsg+= '{:13} {}'.format('Length: ', str(self.count) + '\n\n')
-            outputMsg+= 'Data:' + self._df.to_string()
-            return(outputMsg)
+                outputMsg += "{:4} {:15} {} {}".format(
+                    " ", col, self.columns[col], "\n"
+                )
+            outputMsg += "{:13} {}".format("Value Query: ", self._vq + "\n")
+            outputMsg += "{:13} {}".format("Start Time: ", str(self.startTs) + "\n")
+            outputMsg += "{:13} {}".format("End Time: ", str(self.endTs) + "\n")
+            outputMsg += "{:13} {}".format("Period: ", str(self._timeOffset) + "\n")
+            outputMsg += "{:13} {}".format("Length: ", str(self.count) + "\n\n")
+            outputMsg += "Data:" + self._df.to_string()
+            return outputMsg
 
-    def resample(self, resampleArg='S', stats='m'):
+    def resample(self, resampleArg="S", stats="m", verbose=False):
         """
         Resample the data from the complete dataframe.
         The original data is replaced with the resampled data.
@@ -403,17 +446,25 @@ Assuming a 1 second data frequency.')
         # Make sure the resample argument is valid
         if resampleArg is None:
             # no sample period specified, use 1 second
-            print('    WARNING: ' + self._name + ': No resample period \
-specified. Using 1 Second.')
-            resampleTo = to_offset('S')
+            print(
+                "    WARNING: "
+                + self._name
+                + ": No resample period \
+specified. Using 1 Second."
+            )
+            resampleTo = to_offset("S")
         else:
             try:
                 resampleTo = to_offset(resampleArg)
             except ValueError as ve:
-                print('    WARNING: ' + self._name + ': Invalid resample \
-period specified. Using 1 second.')
+                print(
+                    "    WARNING: "
+                    + self._name
+                    + ": Invalid resample \
+period specified. Using 1 second."
+                )
                 print(ve)
-                resampleTo = to_offset('S')
+                resampleTo = to_offset("S")
 
         if resampleTo < self._timeOffset:
             # Data will be upsampled. We'll have more rows than data.
@@ -424,28 +475,37 @@ period specified. Using 1 second.')
 
             # If stats were specified, print a message about not using the specified stats
             if stats is not None or not stats:
-                print('    WARNING: Data is being upsampled. There will be more \
+                print(
+                    '    WARNING: Data is being upsampled. There will be more \
 rows than data. \nCalculating statistics on repeated values does not make sense, \
 and a non-empty stat parameter was specified.\n The "stats" parameter will be ignored. \n \
-Set "stats" to an empty string ("") or "None" to eliminate this warning.\n')
+Set "stats" to an empty string ("") or "None" to eliminate this warning.\n'
+                )
 
             # Create a new data frame with a timestamp and value column, and
             # force the data type to timestamp and float
             dfResample = pd.DataFrame(columns=[self._tsName])
             dfResample[self._yName] = np.NaN
-            dfResample = dfResample.astype({self._yName: float}, errors = 'ignore')
-            dfResample[self._tsName] = \
-                pd.to_datetime(dfResample[self._tsName], errors='coerce')
+            dfResample = dfResample.astype({self._yName: float}, errors="ignore")
+            dfResample[self._tsName] = pd.to_datetime(
+                dfResample[self._tsName], errors="coerce"
+            )
 
             # set the timestamp as the index
             dfResample.set_index(self._tsName, inplace=True)
             # upsample the data
             try:
-                dfResample[self._yName] = \
-                        self._df.iloc[:,0].resample(resampleTo).pad()
+                dfResample[self._yName] = self._df.iloc[:, 0].resample(resampleTo).pad()
                 # print a message
-                print('    ' + self.name + ': Upsampled from ' \
-                    + str(self._timeOffset) + ' to ' + str(resampleTo))
+                if verbose:
+                    print(
+                        "    "
+                        + self.name
+                        + ": Upsampled from "
+                        + str(self._timeOffset)
+                        + " to "
+                        + str(resampleTo)
+                    )
                 # update the object frequency
                 self._timeOffset = resampleTo
                 # now overwrite the original dataframe with the resampled one
@@ -454,8 +514,13 @@ Set "stats" to an empty string ("") or "None" to eliminate this warning.\n')
                 del dfResample
                 return
             except ValueError as ve:
-                print('    WARNING: ' + self._name + ': Unable to resample \
-data. Data unchanged. Frequency is ' + str(self._timeOffset))
+                print(
+                    "    WARNING: "
+                    + self._name
+                    + ": Unable to resample \
+data. Data unchanged. Frequency is "
+                    + str(self._timeOffset)
+                )
                 print(ve)
                 return
         elif resampleTo > self._timeOffset:
@@ -468,54 +533,59 @@ data. Data unchanged. Frequency is ' + str(self._timeOffset))
             if stats is not None:
                 self._stats = str(stats).lower()
             else:
-                self._stats = ''
+                self._stats = ""
 
             # Determine column names.
             # Determine the stat flags. These are used below to decide which
             # columns to make and calculate. Display the stat if the representative
             # character is in the stats argument. Find returns -1 if not found
-            displayValStat = self._stats.find('v') > -1   # value
-            displayMinStat = self._stats.find('i') > -1   # minimum
-            displayMaxStat = self._stats.find('x') > -1   # maximum
+            displayValStat = self._stats.find("v") > -1  # value
+            displayMinStat = self._stats.find("i") > -1  # minimum
+            displayMaxStat = self._stats.find("x") > -1  # maximum
             # mean or average
-            displayMeanStat = self._stats.find('m') > -1 or self._stats.find('a') > -1
+            displayMeanStat = self._stats.find("m") > -1 or self._stats.find("a") > -1
             # standard deviation
-            displayStdStat = self._stats.find('s') > -1 or self._stats.find('d') > -1
+            displayStdStat = self._stats.find("s") > -1 or self._stats.find("d") > -1
             # If none of the flags are set, an invalid string must have been
             # passed. Display just the mean, and set the stats string accordingly
-            if not displayValStat and not displayMinStat and \
-               not displayMaxStat and not displayMeanStat and \
-               not displayStdStat:
+            if (
+                not displayValStat
+                and not displayMinStat
+                and not displayMaxStat
+                and not displayMeanStat
+                and not displayStdStat
+            ):
                 displayMeanStat = True
-                self._stats = 'm'
+                self._stats = "m"
 
-            minColName = 'min_' + self._name
-            maxColName = 'max_' + self._name
-            meanColName = 'mean_'+ self._name
-            stdColName = 'std_' + self._name
+            minColName = "min_" + self._name
+            maxColName = "max_" + self._name
+            meanColName = "mean_" + self._name
+            stdColName = "std_" + self._name
 
             # Create a new data frame with a timestamp and value column(s), and
             # force the data type(s) to timestamp and float
             dfResample = pd.DataFrame(columns=[self._tsName])
             if displayValStat:
                 dfResample[self._yName] = np.NaN
-                dfResample = dfResample.astype({self._yName: float}, errors = 'ignore')
+                dfResample = dfResample.astype({self._yName: float}, errors="ignore")
             if displayMinStat:
                 dfResample[minColName] = np.NaN
-                dfResample = dfResample.astype({minColName: float}, errors = 'ignore')
+                dfResample = dfResample.astype({minColName: float}, errors="ignore")
             if displayMaxStat:
                 dfResample[maxColName] = np.NaN
-                dfResample = dfResample.astype({maxColName: float}, errors = 'ignore')
+                dfResample = dfResample.astype({maxColName: float}, errors="ignore")
             if displayMeanStat:
                 dfResample[meanColName] = np.NaN
-                dfResample = dfResample.astype({meanColName: float}, errors = 'ignore')
+                dfResample = dfResample.astype({meanColName: float}, errors="ignore")
             if displayStdStat:
                 dfResample[stdColName] = np.NaN
-                dfResample = dfResample.astype({stdColName: float}, errors = 'ignore')
+                dfResample = dfResample.astype({stdColName: float}, errors="ignore")
 
             # force the timestamp to a datetime datatype
-            dfResample[self._tsName] = \
-                pd.to_datetime(dfResample[self._tsName], errors='coerce')
+            dfResample[self._tsName] = pd.to_datetime(
+                dfResample[self._tsName], errors="coerce"
+            )
 
             # set the timestamp as the index
             dfResample.set_index(self._tsName, inplace=True)
@@ -525,32 +595,49 @@ data. Data unchanged. Frequency is ' + str(self._timeOffset))
             # strangely if precision gets truncated.
             try:
                 if displayValStat:
-                    dfResample[self._yName] = \
-                            self._df.iloc[:,0].resample(resampleTo,
-                            label='right', closed='right').last()
+                    dfResample[self._yName] = (
+                        self._df.iloc[:, 0]
+                        .resample(resampleTo, label="right", closed="right")
+                        .last()
+                    )
 
                 if displayMinStat:
-                    dfResample[minColName] = \
-                            self._df.iloc[:,0].resample(resampleTo,
-                            label='right', closed='right').min()
+                    dfResample[minColName] = (
+                        self._df.iloc[:, 0]
+                        .resample(resampleTo, label="right", closed="right")
+                        .min()
+                    )
 
                 if displayMaxStat:
-                    dfResample[maxColName] = \
-                            self._df.iloc[:,0].resample(resampleTo,
-                            label='right', closed='right').max()
+                    dfResample[maxColName] = (
+                        self._df.iloc[:, 0]
+                        .resample(resampleTo, label="right", closed="right")
+                        .max()
+                    )
 
                 if displayMeanStat:
-                    dfResample[meanColName] = \
-                            self._df.iloc[:,0].resample(resampleTo,
-                            label='right', closed='right').mean()
+                    dfResample[meanColName] = (
+                        self._df.iloc[:, 0]
+                        .resample(resampleTo, label="right", closed="right")
+                        .mean()
+                    )
 
                 if displayStdStat:
-                    dfResample[stdColName] = \
-                            self._df.iloc[:,0].resample(resampleTo,
-                            label='right', closed='right').std()
+                    dfResample[stdColName] = (
+                        self._df.iloc[:, 0]
+                        .resample(resampleTo, label="right", closed="right")
+                        .std()
+                    )
                 # print a message
-                print('    ' + self._name + ': Downsampled from ' + \
-                      str(self._timeOffset) + ' to ' + str(resampleTo))
+                if verbose:
+                    print(
+                        "    "
+                        + self._name
+                        + ": Downsampled from "
+                        + str(self._timeOffset)
+                        + " to "
+                        + str(resampleTo)
+                    )
                 # update the object frequency
                 self._timeOffset = resampleTo
                 # now overwrite the original dataframe with the resampled one
@@ -559,14 +646,25 @@ data. Data unchanged. Frequency is ' + str(self._timeOffset))
                 del dfResample
                 return
             except ValueError as ve:
-                print('    WARNING: ' + self._name + ': Unable to resample \
-data. Data unchanged. Frequency is ' + str(self._timeOffset))
+                print(
+                    "    WARNING: "
+                    + self._name
+                    + ": Unable to resample \
+data. Data unchanged. Frequency is "
+                    + str(self._timeOffset)
+                )
                 print(ve)
                 return
         else:
             # resampling not needed. Specified freq matches data already
-            print('    ' + self._name + ': Resampling not needed. New frequency \
-matches data frequency. Data unchanged. Frequency is ' + str(self._timeOffset))
+            if verbose:
+                print(
+                    "    "
+                    + self._name
+                    + ": Resampling not needed. New frequency \
+matches data frequency. Data unchanged. Frequency is "
+                    + str(self._timeOffset)
+                )
             return
 
     def appendData(self, srcDf, IgnoreFirstRows=1):
@@ -591,8 +689,10 @@ matches data frequency. Data unchanged. Frequency is ' + str(self._timeOffset))
         try:
             df_temp = pd.DataFrame(data=srcDf, columns=[self._yName])
         except ValueError:
-            print('    WARNING: The data specified for the appendData function \
-could not be turned into a dataframe. Nothing appended.')
+            print(
+                "    WARNING: The data specified for the appendData function \
+could not be turned into a dataframe. Nothing appended."
+            )
             return
 
         # drop rows that should be ignored
@@ -610,12 +710,12 @@ could not be turned into a dataframe. Nothing appended.')
         # The merge may have made duplicate indexes. Drop them, but this requires
         # resetting and rebuilding the index.
         self._df.reset_index(drop=False, inplace=True)
-        self._df.drop_duplicates(subset=self._tsName, keep='last', inplace=True)
+        self._df.drop_duplicates(subset=self._tsName, keep="last", inplace=True)
         self._df.set_index(self._tsName, inplace=True)
         self._df.sort_index(inplace=True)
         return
 
-    def replaceData(self, srcDf, IgnoreFirstRows = 1):
+    def replaceData(self, srcDf, IgnoreFirstRows=1):
         """
         This function takes a source data frame (srcDf) and replaces the
         member dataframe with it, as long as srcDf is a dataframe.
@@ -635,8 +735,10 @@ could not be turned into a dataframe. Nothing appended.')
         try:
             df_temp = pd.DataFrame(data=srcDf, columns=[self._yName])
         except ValueError:
-            print('    WARNING: The data specified for the replaceData function \
-could not be turned into a dataframe. The data was not replaced.')
+            print(
+                "    WARNING: The data specified for the replaceData function \
+could not be turned into a dataframe. The data was not replaced."
+            )
             return
 
         # drop rows that should be ignored
@@ -648,7 +750,6 @@ could not be turned into a dataframe. The data was not replaced.')
         self._df = self.__massageData(df_temp)
         self._df = self.__filterData()
         return
-
 
     def __massageData(self, srcDf=None, forceColNames=False):
         """
@@ -700,16 +801,20 @@ could not be turned into a dataframe. The data was not replaced.')
         # use srcDf=self._df
         # do this as a work around
         if srcDf is None:
-            srcDf=self._df
+            srcDf = self._df
 
         # make sure a dataframe, or something that can be converted to
         # dataframe is passed in, otherwise leave.
         try:
             df_srcTemp = pd.DataFrame(srcDf)
         except TypeError as te:
-            print('    ERROR Processing ' + self._name + '.\n \
+            print(
+                "    ERROR Processing "
+                + self._name
+                + ".\n \
 The private member function __massageData was not passed source data that can \
-be converted to a dataframe. No data was changed.')
+be converted to a dataframe. No data was changed."
+            )
             print(te)
             raise te
 
@@ -736,7 +841,7 @@ be converted to a dataframe. No data was changed.')
                 # If the index is a datetime datatype, assume this should
                 # be the timestamp column and name it. Otherwise, assume the
                 # leftmost column is the timestamp.
-                if 'datetime64[ns]'==df_srcTemp.index.dtype:
+                if "datetime64[ns]" == df_srcTemp.index.dtype:
                     df_srcTemp.index.rename(self._tsName, inplace=True)
                 else:
                     df_srcTemp.rename(columns={dfCols[0]: self._tsName}, inplace=True)
@@ -751,7 +856,7 @@ be converted to a dataframe. No data was changed.')
                 # Value name isn't already a column name.
                 # If the index is a datetime, assume the value is the 1st column,
                 # otherwise, assume the value is the second column.
-                if 'datetime64[ns]'==df_srcTemp.index.dtype:
+                if "datetime64[ns]" == df_srcTemp.index.dtype:
                     df_srcTemp.rename(columns={dfCols[0]: self._yName}, inplace=True)
                 else:
                     df_srcTemp.rename(columns={dfCols[1]: self._yName}, inplace=True)
@@ -763,31 +868,44 @@ be converted to a dataframe. No data was changed.')
         # If the column names were force, they should be correct and pass
         # the tests below. If not, a name error may be raised.
         # Verify the correct column and/or index names exist. If not raise a NameError
-        if not (self._yName in dfCols) or \
-                not (self._tsName in dfCols or self._tsName == dfIndex):
-                    # source data column names are not as needed. Raise a name error:
+        if not (self._yName in dfCols) or not (
+            self._tsName in dfCols or self._tsName == dfIndex
+        ):
+            # source data column names are not as needed. Raise a name error:
             try:
                 if not (self._yName in dfCols):
-                # value column name not found in the df_srcTemp. Raise a NameError
-                    raise NameError('    ERROR Processing ' + self._name + '.\n \
-The data cannot be processed because a column named "' + self._yName + '" is \
-needed. It is used as the value column.')
+                    # value column name not found in the df_srcTemp. Raise a NameError
+                    raise NameError(
+                        "    ERROR Processing "
+                        + self._name
+                        + '.\n \
+The data cannot be processed because a column named "'
+                        + self._yName
+                        + '" is \
+needed. It is used as the value column.'
+                    )
             except NameError as ne:
-                    print(ne)
-                    print('The column names found in the data are:')
-                    print(dfCols)
-                    raise ne
+                print(ne)
+                print("The column names found in the data are:")
+                print(dfCols)
+                raise ne
 
             try:
                 if not (self._tsName in dfCols or self._tsName == dfIndex):
                     # There is no index or value column name the same as the timestamp
                     # name. Raise a NameError.
-                    raise NameError('    ERROR Processing ' + self._name + '.\n \
+                    raise NameError(
+                        "    ERROR Processing "
+                        + self._name
+                        + '.\n \
 The data cannot be processed because the index or a value column needs to be \
-named "' + self._tsName + '". It is used as the timestamp.')
+named "'
+                        + self._tsName
+                        + '". It is used as the timestamp.'
+                    )
             except NameError as ne:
                 print(ne)
-                print('The column names found in the data are:')
+                print("The column names found in the data are:")
                 print(dfCols)
                 print('The index is named: "' + dfIndex + '".')
                 raise ne
@@ -797,16 +915,20 @@ named "' + self._tsName + '". It is used as the timestamp.')
         #
         # Change the value column to a float if needed. Issue a warning, but
         # do the best conversion possible in any event.
-        if 'float64' != df_srcTemp[self._yName].dtype:
+        if "float64" != df_srcTemp[self._yName].dtype:
             try:
-                df_srcTemp[self._yName] = df_srcTemp[self._yName].astype('float',
-                                                                errors='raise')
+                df_srcTemp[self._yName] = df_srcTemp[self._yName].astype(
+                    "float", errors="raise"
+                )
             except ValueError as ve:
-                print('    WARNING: There was a problem converting at least one \
-value into a float. The conversion did the best conversion possible.')
+                print(
+                    "    WARNING: There was a problem converting at least one \
+value into a float. The conversion did the best conversion possible."
+                )
                 print(ve)
-                df_srcTemp[self._yName] = df_srcTemp[self._yName].astype('float',
-                                                                errors='ignore')
+                df_srcTemp[self._yName] = df_srcTemp[self._yName].astype(
+                    "float", errors="ignore"
+                )
 
         # As an intermediate step, we want the df_srcTemp to have the timestamp as a
         # datetime value column (not the index) so we can more easily drop dups,
@@ -838,10 +960,16 @@ value into a float. The conversion did the best conversion possible.')
         # See if there is an index and column that match the timestamp name.
         # If there is, print a message, and drop the column.
         if self._tsName == dfIndex and (self._tsName in dfCols):
-            print('Processing ' + self._name + '.  The index and a value column \
-both match the timestamp name "' + self._tsName + '". Dropping the column, \
-and keeping the index.' )
-            df_srcTemp.drop(columns=[self._tsName], inplace=True, errors='ignore')
+            print(
+                "Processing "
+                + self._name
+                + '.  The index and a value column \
+both match the timestamp name "'
+                + self._tsName
+                + '". Dropping the column, \
+and keeping the index.'
+            )
+            df_srcTemp.drop(columns=[self._tsName], inplace=True, errors="ignore")
 
         # Now see if the index name matches the timestamp name. If it does,
         # reset the index so the indexed timestamp becomes a normal value column.
@@ -850,46 +978,54 @@ and keeping the index.' )
 
         # Now there is a timestamp value column. See if it is the correct datatype.
         # Convert it if needed.
-        if 'datetime64[ns]' != df_srcTemp[self._tsName].dtype:
+        if "datetime64[ns]" != df_srcTemp[self._tsName].dtype:
             try:
                 # For changing to timestamps, coerce option for errors mayh  mark
                 # some dates as NaT.
                 # Try it with raise first and then resort to coerce if needed.
-                df_srcTemp[self._tsName] = pd.to_datetime(df_srcTemp[self._tsName],
-                                                        errors='raise',
-                                                        box = True,
-                                                        format=self._sourceTimeFormat,
-                                                        exact=False,
-                                                        #infer_datetime_format = True,
-                                                        origin = 'unix')
+                df_srcTemp[self._tsName] = pd.to_datetime(
+                    df_srcTemp[self._tsName],
+                    errors="raise",
+                    box=True,
+                    format=self._sourceTimeFormat,
+                    exact=False,
+                    # infer_datetime_format = True,
+                    origin="unix",
+                )
             except ValueError as ve:
-                print('    WARNING: Processing ' + self._name + '. There was \
+                print(
+                    "    WARNING: Processing "
+                    + self._name
+                    + ". There was \
 a problem converting some timestamps. Timestamps may be incorrect, and/or some \
-rows may be missing.')
+rows may be missing."
+                )
                 print(ve)
-                df_srcTemp[self._tsName] = pd.to_datetime(df_srcTemp[self._tsName],
-                                                    errors='coerce',
-                                                    box = True,
-                                                    infer_datetime_format = True,
-                                                    origin = 'unix')
+                df_srcTemp[self._tsName] = pd.to_datetime(
+                    df_srcTemp[self._tsName],
+                    errors="coerce",
+                    box=True,
+                    infer_datetime_format=True,
+                    origin="unix",
+                )
 
         # Now the column names and data types are correct.
         # Condition the data and (re)index it.
         # Get rid of any NaN/NaT values in either column. These can be from the
         # original data or from invalid conversions to float or datetime.
-        df_srcTemp.dropna(subset=[self._tsName, self._yName], how='any', inplace=True)
+        df_srcTemp.dropna(subset=[self._tsName, self._yName], how="any", inplace=True)
         # Rround the timestamp to the nearest ms. Unseen ns and
         # fractional ms values are not always displayed, and can cause
         # unexpected merge and up/downsample results.
         try:
-            df_srcTemp[self._tsName] = df_srcTemp[self._tsName].dt.round('L')
+            df_srcTemp[self._tsName] = df_srcTemp[self._tsName].dt.round("L")
         except ValueError as ve:
-            print('    WARNING: Timestamp cannot be rounded.')
+            print("    WARNING: Timestamp cannot be rounded.")
             print(ve)
 
         # Get rid of any duplicate timestamps. Done after rounding in case rouding
         # introduced dups.
-        df_srcTemp.drop_duplicates(subset=self._tsName, keep='last', inplace=True)
+        df_srcTemp.drop_duplicates(subset=self._tsName, keep="last", inplace=True)
 
         # Now the data type is correct, and foreseen data errors are removed.
         # Set the index to the timestamp column and sort it.
@@ -914,30 +1050,36 @@ rows may be missing.')
         # use srcDf=self._df
         # do this as a work around
         if srcDf is None:
-            srcDf=self._df
+            srcDf = self._df
 
         # make sure a dataframe, or something that can be converted to a
         # dataframe is passed in, otherwise leave.
         try:
             df_temp = pd.DataFrame(srcDf)
         except TypeError as te:
-            print('    ERROR Processing ' + self._name + '.\n \
+            print(
+                "    ERROR Processing "
+                + self._name
+                + ".\n \
 The private member function __filterData was not passed anything that can \
-be converted to a dataframe. No data was changed.')
+be converted to a dataframe. No data was changed."
+            )
             print(te)
             raise te
 
         # Apply the query string if one is specified.
         # Replace "val" with the column name.
-        if self._vq != '':
+        if self._vq != "":
             queryStr = self._vq.replace("val", self._yName)
             # try to run the query string, but ignore it on error
             try:
-                df_temp.query(queryStr, inplace = True)
+                df_temp.query(queryStr, inplace=True)
 
             except ValueError:
-                print('    WARNING: Invalid query string. Ignoring the \
-specified query when appending data.')
+                print(
+                    "    WARNING: Invalid query string. Ignoring the \
+specified query when appending data."
+                )
 
         # Timestamp is the index, so filter based on the specified
         # start and end times.
@@ -1008,4 +1150,3 @@ specified query when appending data.')
     @property
     def isEmpty(self):
         return self._df.empty
-
