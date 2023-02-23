@@ -12,6 +12,21 @@
 # Disable this warning.
 # pylint: disable=C0103 # verbose: 'invalid-name'
 
+# Varialbe Naming Conventions:
+# Class Names: normally use CapWords Conventions
+# Type Variable Names: CapWords convention, or single cap letter. Prefer short names.
+# Exception Names: CapWords or follow class naming convention. Suffix should be Error, etc.
+# Function Names: lowercase_with_underscores. or mixedCase if already prevailing.
+# Variable Names: Follow naming of functions. lowercase_with_underscores or mixedCase if already prevailing.
+# Function and Method Arguments:
+#   'self' as first argument for instance methods.
+#   'cls' as first argument to class methods.
+#   Append underscore '_' in the event of a name clash. Better: use synonym.
+# Method Names and Instance Variables: Follow function naming rules: lowercase_with_underscores.
+#   Use one leading underscore for non-public methods and instance varialbes.
+#   Use two leading underscores to invoke name mangling rules._
+# Constants: ALL_CAPS_WITH_UNDERSCORES. Usually defined on a module level.
+
 """
 pyTemplate.py
 
