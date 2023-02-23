@@ -5,6 +5,13 @@
 # and be more portable
 #!/home/jcsheeron/swDev/python/ftArchPostProc/bin/python
 
+# Example of how to disable a pylint check
+# C0103 warns that module level vars should be/are constants and should be
+# named accordingly with ALL CAPS in an inconsistent and anyoying way.
+# Also warns of non snake_case naming.
+# Disable this warning.
+# pylint: disable=C0103 # verbose: 'invalid-name'
+
 """
 pyTemplate.py
 
