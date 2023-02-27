@@ -5,16 +5,15 @@
 # imports
 #
 # system related
-import sys
-
+# import sys
 # date and time stuff
 from datetime import datetime, time
-from pandas.tseries.frequencies import to_offset
-from dateutil import parser as duparser
 
 # numerical manipulation libraries
 import numpy as np
 import pandas as pd
+from dateutil import parser as duparser
+from pandas.tseries.frequencies import to_offset
 
 
 class TsIdxData(object):
@@ -34,7 +33,7 @@ class TsIdxData(object):
 
     The source data used to populate the container also must have one value
     column or an index column with a name that matches tsName. This column will be
-    used as the index.
+    used as the index, and must be a datetime, or convertable to a datetime.
 
     The constructor is expecting a data frame which is used as the source data.
 
@@ -92,7 +91,7 @@ class TsIdxData(object):
 
     In addition the data can be resampled, using the resample(args, stats) method.
     Resampling makes the most sense when the original data has time stamps at
-    regular intervals, and the interval needs# to be changed.
+    regular intervals, and the interval needs to be changed.
     If the data is being upsampled (increase the frequency),
     than values will be forward filled to populate gaps in the data. If the data
     is being downsampled (decrease in frequency), then the specified stats will
@@ -196,27 +195,26 @@ class TsIdxData(object):
 
         # Convert the start and end times to datetimes if they are specified.
         # Use the dateutil.parser function to get input flexability, and then
-        # convert to a pandas datetime for max compatibility
+        # convert to a datetime for max compatibility
         # If time info is not included in the start time, it defaults to
         # midnight, so comparisons will work as expected and capture the entire
         # day. For the end time, however, if time info is not included, force
-        # it to be 11:59:59.999 so the entire end date is captured.
+        # it to be 23:59:59.999 so the entire end date is captured.
         if startQuery is None:
             self._startQuery = None
         else:
             # see if it is already a datetime. If it is, no need to do
             # anything. If it isn't then convert it. If there is a conversion
             # error, set to none and print a message
-            if not isinstance(startQuery, pd.datetime):
+            if not isinstance(startQuery, datetime):
                 # need to convert
                 try:
                     self._startQuery = duparser.parse(startQuery, fuzzy=True)
-                    # convert to a pandas datetime for max compatibility
+                    # convert to datetime for max compatibility
                     self._startQuery = pd.to_datetime(
                         self._startQuery,
                         # format='%m/%d/%Y %I:%M:%S %p',
                         errors="raise",
-                        box=True,
                         infer_datetime_format=True,
                         origin="unix",
                     )
@@ -236,7 +234,7 @@ class TsIdxData(object):
             # see if it is already a datetime. If it is, just update the member
             # anything. If it isn't then convert it. If there is a conversion
             # error, set to none and print a message
-            if not isinstance(endQuery, pd.datetime):
+            if not isinstance(endQuery, datetime):
                 # need to convert
                 try:
                     self._endQuery = duparser.parse(endQuery, fuzzy=True)
@@ -247,12 +245,10 @@ class TsIdxData(object):
                             hour=23, minute=59, second=59, microsecond=999999
                         )
 
-                    # convert to a pandas datetime for max compatibility
+                    # convert to a datetime for max compatibility
                     self._endQuery = pd.to_datetime(
                         self._endQuery,
-                        # format='%m/%d/%Y %I:%M:%S %p',
                         errors="raise",
-                        box=True,
                         infer_datetime_format=True,
                         origin="unix",
                     )
@@ -272,11 +268,10 @@ class TsIdxData(object):
                         hour=23, minute=59, second=59, microsecond=999999
                     )
 
-                # convert to a pandas datetime for max compatibility
+                # convert to a datetime for max compatibility
                 self._endQuery = pd.to_datetime(
                     self._endQuery,
                     errors="coerce",
-                    box=True,
                     infer_datetime_format=True,
                     origin="unix",
                 )
@@ -288,7 +283,7 @@ class TsIdxData(object):
         # Get the specified data into the member data.
         # Trying to make a new dataframe allows something like a dataframe
         # to be used (like a list, dict, or other dataframe.
-        # If it isn't possible to build a dataframe from what, then assign an
+        # If it isn't possible to build a dataframe from that, then assign an
         # empty dataframe.
         try:
             self._df = pd.DataFrame(df)
@@ -495,7 +490,9 @@ Set "stats" to an empty string ("") or "None" to eliminate this warning.\n'
             dfResample.set_index(self._tsName, inplace=True)
             # upsample the data
             try:
-                dfResample[self._yName] = self._df.iloc[:, 0].resample(resampleTo).pad()
+                dfResample[self._yName] = (
+                    self._df.iloc[:, 0].resample(resampleTo).fillna(method="ffill")
+                )
                 # print a message
                 if verbose:
                     print(
@@ -755,7 +752,7 @@ could not be turned into a dataframe. The data was not replaced."
         """
         Private member function to massage a specified dataframe, and return
         the resulting dataframe.
-        If no source data is specified, the memeber data is used as the source.
+        If no source data is specified, the member data is used as the source.
 
         This function assumes the source is a dataframe with at least:
             1) an index and a column OR
@@ -980,13 +977,12 @@ and keeping the index.'
         # Convert it if needed.
         if "datetime64[ns]" != df_srcTemp[self._tsName].dtype:
             try:
-                # For changing to timestamps, coerce option for errors mayh  mark
+                # For changing to timestamps, coerce option for errors may  mark
                 # some dates as NaT.
                 # Try it with raise first and then resort to coerce if needed.
                 df_srcTemp[self._tsName] = pd.to_datetime(
                     df_srcTemp[self._tsName],
                     errors="raise",
-                    box=True,
                     format=self._sourceTimeFormat,
                     exact=False,
                     # infer_datetime_format = True,
@@ -1004,7 +1000,6 @@ rows may be missing."
                 df_srcTemp[self._tsName] = pd.to_datetime(
                     df_srcTemp[self._tsName],
                     errors="coerce",
-                    box=True,
                     infer_datetime_format=True,
                     origin="unix",
                 )
