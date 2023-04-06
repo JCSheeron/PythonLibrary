@@ -1,0 +1,13 @@
+
+# import sorting
+[tool.isort]
+known_first_party = [
+  "bpsCPdf",
+  "bbsDateTime",
+  "bpsFile",
+  "bpsList",
+  "bpsMath",
+  "bpsPrettyPrint",
+  "bpsString",
+  "bpsTsIdxData",
+]
