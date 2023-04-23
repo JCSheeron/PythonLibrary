@@ -3,6 +3,22 @@
 # bpsPrettyPrint.py
 # Functions related to printing out things that look nice.
 
+def listPrettyPrint1Col(foolist):
+    '''Print a list as a single column.'''
+    # the passed in thing must be a list, or convertable to one
+    try:
+        lst = list(foolist)
+    except ValueError as ve:
+        print('The parameter passed to listPrettyPrint1Col must be a list, \
+or something convertable to a list.')
+        print(ve)
+        return
+
+    # now print the list in a single column
+    # unpack the list into the print statement, and use a \n to
+    # separate elements.
+    print(*foolist, sep='\n')
+
 def listPrettyPrint2Col(foolist, width=45):
     '''Print a list in two columns, given a column width.'''
     # the passed in thing must be a list, or convertable to one
