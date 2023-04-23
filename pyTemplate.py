@@ -9,8 +9,10 @@
 # C0103 warns that module level vars should be/are constants and should be
 # named accordingly with ALL CAPS in an inconsistent and anyoying way.
 # Also warns of non snake_case naming.
-# Disable this warning.
-# pylint: disable=C0103 # verbose: 'invalid-name'
+# Disable this warning. Note, remove '__' in front to activate the disabling.
+# The '--' is there so the syntax or pylint: disable can be shown Without
+# actually disabling the warning
+# __pylint: disable=C0103 # verbose: 'invalid-name'
 
 # Varialbe Naming Conventions:
 # Class Names: normally use CapWords Conventions
