@@ -7,25 +7,25 @@
 
 # Example of how to disable a pylint check
 # C0103 warns that module level vars should be/are constants and should be
-# named accordingly with ALL CAPS in an inconsistent and anyoying way.
+# named accordingly with ALL CAPS in an inconsistent and annoying way.
 # Also warns of non snake_case naming.
 # Disable this warning. Note, remove '__' in front to activate the disabling.
 # The '--' is there so the syntax or pylint: disable can be shown Without
 # actually disabling the warning
 # __pylint: disable=C0103 # verbose: 'invalid-name'
 
-# Varialbe Naming Conventions:
+# Variable Naming Conventions:
 # Class Names: normally use CapWords Conventions
 # Type Variable Names: CapWords convention, or single cap letter. Prefer short names.
 # Exception Names: CapWords or follow class naming convention. Suffix should be Error, etc.
-# Function Names: lowercase_with_underscores. or mixedCase if already prevailing.
-# Variable Names: Follow naming of functions. lowercase_with_underscores or mixedCase if already prevailing.
+# Function Names: lowercase_with_underscores, or mixedCase if already prevailing.
+# Variable Names: Follow naming of functions, lowercase_with_underscores or mixedCase if already prevailing.
 # Function and Method Arguments:
 #   'self' as first argument for instance methods.
 #   'cls' as first argument to class methods.
 #   Append underscore '_' in the event of a name clash. Better: use synonym.
 # Method Names and Instance Variables: Follow function naming rules: lowercase_with_underscores.
-#   Use one leading underscore for non-public methods and instance varialbes.
+#   Use one leading underscore for non-public methods and instance variables.
 #   Use two leading underscores to invoke name mangling rules._
 # Constants: ALL_CAPS_WITH_UNDERSCORES. Usually defined on a module level.
 
@@ -37,7 +37,7 @@ Start out with a docstring with the name of the file.
 Then explain what the program does.
 
 This is intended to be a template to be used as a starting place when creating a
-new python program. It is just a basic formatted framwork and some examples of
+new python program. It is just a basic formatted framework and some examples of
 how to import libraries, set up command line arguments, and read in a config file.
 """
 
@@ -85,7 +85,7 @@ def helperFunction2(arg1):
     return arg1
 
 
-# eample of defining a local function
+# example of defining a local function
 # example of enforcing specifics on an argument
 def intDegree(degArg):
     value = int(degArg)
@@ -97,20 +97,20 @@ def intDegree(degArg):
 
 # Main function to execute when script is run
 def main():
-    """Brief 1 line descripiton.
+    """Brief 1 line description.
 
     More detailed description should describe the program, what it does, and how to use it.
-    This program in inteded to be (run directly || used as in imported module).
+    This program in intended to be (run directly || used as in imported module).
 
     Blah Blah Blah
     Blah Blah Blah
     Blah Blah Blah
     """
-    # Descripiton string will show up in help.
+    # Description string will show up in help.
     # Here is how you reuse the doc string from above.
     DESC_STR = main.__doc__
-    # Create an epilog string to further describe the input file
-    # The epilog will show up at the bottom of the help
+    # Create an epilogue string to further describe the input file
+    # The epilogue will show up at the bottom of the help
     EPL_STR = """More info shown at the bottom of the help."""
 
     # **** argument parsing
@@ -137,7 +137,7 @@ def main():
         "--configFile",
         default="config.ini",
         metavar="",
-        help="Config file. Default is config.ini.",
+        help="Configuration file. Default is config.ini.",
     )
     parser.add_argument(
         "-v",
@@ -183,18 +183,18 @@ def main():
     args = parser.parse_args()
 
     # At this point, the arguments will be:
-    # Argument          Values      Description
-    # args.posArg1      string
-    # args.posArg2      string
-    # args.degree       integer >= 1
-    # args.configFile   string, default 'config.ini'
-    # args.verbose      True/False, default False
-    # args.optionalArgument1     string
-    # args.optionalArgument2      string
-    # args.optTFArg1    True/False
-    # args.me1          True/False
-    # args.me2          True/False
-    # args.me3          True/False
+    # Argument                  Type      Default  Notes
+    # args.posArg1              string
+    # args.posArg2              string
+    # args.degree               integer >= 1
+    # args.configFile           string      'config.ini'
+    # args.verbose              True/False  default False
+    # args.optionalArgument1    string
+    # args.optionalArgument2    string
+    # args.optTFArg1            True/False
+    # args.me1                  True/False
+    # args.me2                  True/False
+    # args.me3                  True/False
 
     # Put the begin mark here, after the arg parsing, so argument problems are
     # reported first.
@@ -235,7 +235,7 @@ def main():
     else:
         # arg is none, so print a message.
         # Not actually possible, since this is a positional argument.
-        # Inclued here so we can see how to process arguments.
+        # Included here so we can see how to process arguments.
         print("No value for posArg1.")
 
     if args.posArg2 is not None:
@@ -243,7 +243,7 @@ def main():
     else:
         # arg is none, so print a message.
         # Not actually possible, since this is a positional argument.
-        # Inclued here so we can see how to process arguments.
+        # Included here so we can see how to process arguments.
         print("No value for posArg2.")
 
     if args.degree is not None:
