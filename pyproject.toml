@@ -1,13 +1,17 @@
-
 # import sorting
-[tool.isort]
-known_first_party = [
-  "bpsCPdf",
-  "bbsDateTime",
-  "bpsFile",
-  "bpsList",
-  "bpsMath",
-  "bpsPrettyPrint",
-  "bpsString",
-  "bpsTsIdxData",
-]
+# Not used, but here in case it is wanted later
+#[tool.isort]
+#known_first_party = [
+#  "bpsCPdf",
+#  "bbsDateTime",
+#  "bpsFile",
+#  "bpsList",
+#  "bpsMath",
+#  "bpsPrettyPrint",
+#  "bpsString",
+#  "bpsTsIdxData",
+#]
+
+# configure opinionated python linter
+[tool.pylint.string]
+check-quote-consistency = true
