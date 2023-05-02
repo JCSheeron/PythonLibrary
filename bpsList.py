@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
 # bpsList.py
 # Funcitons for dealing with lists
 #
@@ -68,27 +69,83 @@ convertable to a list."
 
 # Return a list of values found in both lists
 def listToListIntersection(seqA, seqB):
-    """Given two lists, return a list of values found in both lists."""
-    # Make sure listA and ListB can be a list. Message and out if not.
+    """Given two lists/sets, return a list of values found in both."""
+    # Make sure listA and ListB can be a list/set. Message and out if not.
     try:
-        srcListA = list(seqA)
+        srcSetA = set(seqA)
     except ValueError as ve:
         print(
-            "ERROR: listToListIntersection function must be passed two list \
-objects, or two obejcts that can be converted to lists.  This is not the case \
+            "ERROR: listToListIntersection function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
 for the 1st argument."
         )
         print(ve)
         return None
     try:
-        srcListB = list(seqB)
+        srcSetB = set(seqB)
     except ValueError as ve:
         print(
-            "ERROR: listToListIntersection function must be passed two list \
-objects, or two obejcts that can be converted to lists.  This is not the case \
+            "ERROR: listToListIntersection function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
 for the 2nd argument."
         )
         print(ve)
         return None
     # return a list of common values.
-    return list(set(srcListA).intersection(srcListB))
+    return list(set(srcSetA).intersection(srcSetB))
+
+
+# Return a list of values found in A but not in B
+def listANotInB(seqA, seqB):
+    """Given two lists/sets, return a list of values found only in the first one."""
+    # Make sure listA and ListB can be a set. Message and out if not.
+    try:
+        srcSetA = set(seqA)
+    except ValueError as ve:
+        print(
+            "ERROR: listANotInB function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
+for the 1st argument."
+        )
+        print(ve)
+        return None
+    try:
+        srcSetB = set(seqB)
+    except ValueError as ve:
+        print(
+            "ERROR: listANotInB function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
+for the 2nd argument."
+        )
+        print(ve)
+        return None
+    # return a list of values that are not in the second sequence
+    return list(filter(lambda ele: ele not in srcSetB, srcSetA))
+
+
+# Return true if list A is a subset of list B
+def listAisSubset(seqA, seqB):
+    """Given two lists/sets, return true if the first is a subset of the second."""
+    # Make sure listA and ListB can be a set. Message and out if not.
+    try:
+        srcSetA = set(seqA)
+    except ValueError as ve:
+        print(
+            "ERROR: listAIsSubset function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
+for the 1st argument."
+        )
+        print(ve)
+        return False
+    try:
+        srcSetB = set(seqB)
+    except ValueError as ve:
+        print(
+            "ERROR: listAIsSubset function must be passed two list/set \
+objects, or two obejcts that can be converted to sets.  This is not the case \
+for the 2nd argument."
+        )
+        print(ve)
+        return False
+    # return true if set A is a subset of B
+    return srcSetA.issubset(srcSetB)
