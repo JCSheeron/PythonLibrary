@@ -5,6 +5,9 @@
 # and be more portable
 #!/home/jcsheeron/swDev/python/ftArchPostProc/bin/python
 
+# turn off import sorting for this file
+# isort: skip_file
+
 # Example of how to disable a pylint check, if not done globally in pyproject.toml.
 # C0103 warns that module level vars should be/are constants and should be
 # named accordingly with ALL CAPS in an inconsistent and annoying way.
